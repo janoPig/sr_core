@@ -1,0 +1,111 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "debug gcc",
+      "type": "shell",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-g",
+        "-std=c++20",
+        "${workspaceFolder}/test/*.cpp",
+        "${workspaceFolder}/Csv/*.cpp",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "group": "build",
+      "presentation": {
+        // Reveal the output only if unrecognized errors occur.
+        "reveal": "silent"
+      },
+      // Use the standard MS compiler pattern to detect errors, warnings and infos
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "release gcc",
+      "type": "shell",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-std=c++20",
+        "-O3",
+        "-mavx2",
+        "-funsafe-math-optimizations",
+        "-fno-exceptions",
+        "-ftree-vectorize",
+        "-mno-avx256-split-unaligned-load",
+        "-mno-avx256-split-unaligned-store",
+        "${workspaceFolder}/test/*.cpp",
+        "${workspaceFolder}/Csv/*.cpp",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "group": "build",
+      "presentation": {
+        // Reveal the output only if unrecognized errors occur.
+        "reveal": "silent"
+      },
+      // Use the standard MS compiler pattern to detect errors, warnings and infos
+      "problemMatcher": "$gcc"
+    }
+    ,
+    {
+      "label": "release clang",
+      "type": "shell",
+      "command": "/usr/bin/clang++-15",
+      "args": [
+        "-fveclib=SVML",
+        "-g",
+        "-std=c++20",
+        "-O3",
+        "-mavx2",
+        "-Wall",
+        "-Wextra",
+        "-funsafe-math-optimizations",
+        "-ftree-vectorize",
+        "-fno-exceptions",
+        "-static",
+        "${workspaceFolder}/test/*.cpp",
+        "${workspaceFolder}/Csv/*.cpp",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "group": "build",
+      "presentation": {
+        // Reveal the output only if unrecognized errors occur.
+        "reveal": "silent"
+      },
+      // Use the standard MS compiler pattern to detect errors, warnings and infos
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "profile gcc",
+      "type": "shell",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-g",
+        "-std=c++20",
+        "-pg",
+        "-O3",
+        "-mavx2",
+        "-funsafe-math-optimizations",
+        "-fno-exceptions",
+        "-ftree-vectorize",
+        "-mno-avx256-split-unaligned-load",
+        "-mno-avx256-split-unaligned-store",
+        "${file}",
+        "${workspaceFolder}/Csv/*.cpp",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "group": "build",
+      "presentation": {
+        // Reveal the output only if unrecognized errors occur.
+        "reveal": "silent"
+      },
+      // Use the standard MS compiler pattern to detect errors, warnings and infos
+      "problemMatcher": "$gcc"
+    }
+  ]
+}

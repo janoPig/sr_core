@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="test">
+      <UniqueIdentifier>{55457a1e-0b67-48ba-b63f-fc31c9622aa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Csv">
+      <UniqueIdentifier>{741a69dd-a736-480e-b30b-1953a6ac4e1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hroch">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="SymbolicRegression">
+      <UniqueIdentifier>{7e806484-5232-47d1-9276-fd9d0a87c204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SymbolicRegression\Computer">
+      <UniqueIdentifier>{dcd0016b-eb4d-4244-b13f-0bc9c8624c6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SymbolicRegression\Computer\Instructions">
+      <UniqueIdentifier>{72df2e7f-2173-4687-93e3-c6ef26bd9e21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SymbolicRegression\Utils">
+      <UniqueIdentifier>{d7786fd7-f940-4134-8c4c-02e423750ced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SymbolicRegression\HillClimb">
+      <UniqueIdentifier>{c5bbed30-793c-4e20-8a8b-4fafe31dfe36}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\csv\CsvFile.cpp">
+      <Filter>Csv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\test\a_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>Hroch</Filter>
+    </ClCompile>
+    <ClCompile Include="Inteface.cpp">
+      <Filter>Hroch</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\csv\CsvFile.h">
+      <Filter>Csv</Filter>
+    </ClInclude>
+    <ClInclude Include="SolverWrapper.h">
+      <Filter>Hroch</Filter>
+    </ClInclude>
+    <ClInclude Include="Inteface.h">
+      <Filter>Hroch</Filter>
+    </ClInclude>
+    <ClInclude Include="Logo.h">
+      <Filter>Hroch</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>Hroch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\AdvancedMath.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\BasicMath.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\CodeGen.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\Fuzzy.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\Instructions.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Instructions\Prototype.h">
+      <Filter>SymbolicRegression\Computer\Instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Code.h">
+      <Filter>SymbolicRegression\Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Machine.h">
+      <Filter>SymbolicRegression\Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Memory.h">
+      <Filter>SymbolicRegression\Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Computer\Processor.h">
+      <Filter>SymbolicRegression\Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\HillClimb\HillClimber.h">
+      <Filter>SymbolicRegression\HillClimb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\HillClimb\Mutation.h">
+      <Filter>SymbolicRegression\HillClimb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\HillClimb\Solver.h">
+      <Filter>SymbolicRegression\HillClimb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\BatchVector.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\Dataset.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\Evaluate.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\Rand.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\Utils.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Config.h">
+      <Filter>SymbolicRegression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Defs.h">
+      <Filter>SymbolicRegression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\StdRequired.h">
+      <Filter>SymbolicRegression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\SymbolicRegression.h">
+      <Filter>SymbolicRegression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\HillClimb\CodeInitializer.h">
+      <Filter>SymbolicRegression\HillClimb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\HillClimb\EvaluatedCode.h">
+      <Filter>SymbolicRegression\HillClimb</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
