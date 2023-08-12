@@ -1,0 +1,1 @@
+DRY, KISS & YAGNI Principles
