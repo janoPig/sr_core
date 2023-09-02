@@ -26,6 +26,7 @@ namespace SymbolicRegression
         }
 
         Code mCode{};
-        double mScore[4] = { LARGE_FLOAT, LARGE_FLOAT, LARGE_FLOAT, LARGE_FLOAT };
+        double mScore[4] = {LARGE_FLOAT, LARGE_FLOAT, LARGE_FLOAT, LARGE_FLOAT};
+        T mCoeffs[2];
     };
 }

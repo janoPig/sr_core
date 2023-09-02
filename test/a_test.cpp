@@ -35,7 +35,7 @@ void run_test(const char *path)
     }
 
     Srl::Config cfg{
-        .mRandomSeed = 42,
+        .mRandomSeed = 142,
         .mPopulationSize = 64,
         .mTransformation = 0,
         .mClipMin = 0.0,
@@ -86,10 +86,15 @@ void run_test(const char *path)
     testStart = high_resolution_clock::now();
     solver.Fit(data, fp, test_callback);
 }
-
+// #if 0
 int main(int /*argc*/, char * /*argv*/[])
 {
-    run_test("../test/586_fri_c3_1000_25.tsd");
+    // run_test("../test/586_fri_c3_1000_25.tsd");
+    //       1196_BNG_pharynx.tsv6
+    run_test("../test/1196_BNG_pharynx.tsv");
+    //  feynman_III_15_12.tsv
+    run_test("../test/feynman_III_10_19.tsv");
 
     return 0;
 }
+// #endif

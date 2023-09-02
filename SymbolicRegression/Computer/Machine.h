@@ -5,6 +5,7 @@
 #include "Code.h"
 #include "../Utils/Dataset.h"
 #include "../Utils/Evaluate.h"
+#include "../Utils/LinearRegression.h"
 
 namespace SymbolicRegression::Computer
 {
@@ -66,6 +67,63 @@ namespace SymbolicRegression::Computer
 				}
 			}
 			return std::pair{worstIdx, maxError / BATCH};
+		}
+
+		auto ComputeScoreOLS(const Dataset &data, const Code<T> &code, const std::vector<size_t> &batchSelection, T *__restrict buff_x, T *__restrict buff_y) noexcept
+		{
+			struct Result
+			{
+				double err;
+				T B0;
+				T B1;
+			};
+
+			T *__restrict yPred = mMemory[code.Size() - 1];
+
+			for (size_t i = 0; i < batchSelection.size(); i++)
+			{
+				const auto batchIdx = batchSelection[i];
+				mProcessor.Execute(code, data, mMemory, batchIdx, true);
+				const auto y = data.BatchY(batchIdx);
+
+				auto *xptr = &buff_x[i * BATCH];
+				auto *yptr = &buff_y[i * BATCH];
+
+				for (size_t n = 0; n < BATCH; n++)
+				{
+					xptr[n] = yPred[n];
+					yptr[n] = y[n];
+				}
+			}
+
+			const T *X[2] = {nullptr, buff_x};
+			T B[2] = {0, 1};
+
+			Utils::linear_regression_2<T>(X, buff_y, B, batchSelection.size() * BATCH);
+
+			auto err = 0.0;
+			for (size_t i = 0; i < batchSelection.size() * BATCH; i++)
+			{
+				const auto y2 = B[0] + B[1] * buff_x[i];
+				err += (buff_y[i] - y2) * (buff_y[i] - y2);
+			}
+			return Result{err / (batchSelection.size() * BATCH), B[0], B[1]};
+		}
+
+		void ComputeOLS(Dataset &data, const Code<T> &code, T B0, T B1) noexcept
+		{
+			T *__restrict yPred = mMemory[code.Size() - 1];
+
+			for (size_t batchIdx = 0; batchIdx < data.BatchCount(); batchIdx++)
+			{
+				mProcessor.Execute(code, data, mMemory, batchIdx, true);
+
+				T *const __restrict y2 = data.BatchY(batchIdx);
+				for (size_t n = 0; n < BATCH; n++)
+				{
+					y2[n] = B0 + B1 * yPred[n];
+				}
+			}
 		}
 
 		void Compute(Dataset &data, const Code<T> &code, uint32_t transformation, T clipMin, T clipMax, bool filter = false) noexcept

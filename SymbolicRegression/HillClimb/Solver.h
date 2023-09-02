@@ -5,6 +5,7 @@
 #include "CodeInitializer.h"
 #include "../Utils/Dataset.h"
 #include "../Computer/Machine.h"
+#include "../Utils/LinearRegression.h"
 
 using namespace std::chrono;
 namespace SymbolicRegression::HillClimb
@@ -28,7 +29,6 @@ namespace SymbolicRegression::HillClimb
 
     public:
         Solver() = delete;
-        ~Solver() = default;
 
         Solver(const Config &config)
             : mInitialized(false),
@@ -36,9 +36,17 @@ namespace SymbolicRegression::HillClimb
               mRandom(),
               mMachine(config.mCodeSettings),
               mPopulation(config.mPopulationSize, config.mCodeSettings),
-              mBestCode(config.mCodeSettings)
+              mBestCode(config.mCodeSettings),
+              mBuffX(nullptr),
+              mBuffY(nullptr)
         {
             mRandom.Seed(config.mRandomSeed);
+        }
+
+        ~Solver()
+        {
+            Utils::AlignedFree(mBuffX);
+            Utils::AlignedFree(mBuffY);
         }
 
         template <typename CALLBACK>
@@ -46,6 +54,11 @@ namespace SymbolicRegression::HillClimb
         {
             if (fp.mVerbose > 1)
                 printf("fit start, random engine state %zu\n", mRandom.State());
+
+            Utils::AlignedFree(mBuffX);
+            Utils::AlignedFree(mBuffY);
+            mBuffX = Utils::AlignedAlloc<T>(32, data.BatchCount() * BATCH);
+            mBuffY = Utils::AlignedAlloc<T>(32, data.BatchCount() * BATCH);
 
             const auto fitStartTime = high_resolution_clock::now();
 
@@ -89,7 +102,10 @@ namespace SymbolicRegression::HillClimb
                 {
                     const auto score = EvalPopulation(data, fp);
                     if (fp.mVerbose > 1)
+                    {
                         callback(it, score);
+                        // std::cout << GetExpression(mBestCode) << std::endl;
+                    }
                 }
 
                 const auto [hillclimber, selIdx] = TournamentSelection(fp.mTournament);
@@ -111,7 +127,7 @@ namespace SymbolicRegression::HillClimb
                         if (neighbour.mCode.IsConstExpression(indices.data(), mCodeMapping.set))
                             continue;
 
-                        Evaluate(data, neighbour, std::vector<size_t>{{hillclimber->mWorstBatch.first}}, 0, fp);
+                        EvaluateOLS(data, neighbour, std::vector<size_t>{{hillclimber->mWorstBatch.first}}, 0);
 
                         if (neighbour.mScore[0] >= 1.1 * hillclimber->Current().mScore[0])
                         {
@@ -119,7 +135,7 @@ namespace SymbolicRegression::HillClimb
                         }
 
                         if (data.BatchCount() > 1)
-                            Evaluate(data, neighbour, hillclimber->mSmallSet, 1, fp);
+                            EvaluateOLS(data, neighbour, hillclimber->mSmallSet, 1);
                         else
                             neighbour.mScore[1] = neighbour.mScore[0];
 
@@ -136,12 +152,12 @@ namespace SymbolicRegression::HillClimb
                 {
                     if (bestCode.mScore[1] < hillclimber->Best().mScore[1] * 1.15)
                     {
-                        const auto worstBatch = Evaluate(data, bestCode, hillclimber->mBigSet, 2, fp);
+                        const auto worstBatch = EvaluateOLS(data, bestCode, hillclimber->mBigSet, 2);
                         if (bestCode.mScore[2] < hillclimber->Best().mScore[2])
                         {
-                            bestCode.mScore[0] = worstBatch.second;
+                            // bestCode.mScore[0] = worstBatch.second;
                             hillclimber->Best() = bestCode;
-                            hillclimber->mWorstBatch = worstBatch;
+                            // hillclimber->mWorstBatch = worstBatch;
                         }
                     }
                     hillclimber->Current() = bestCode;
@@ -152,13 +168,13 @@ namespace SymbolicRegression::HillClimb
 
         void Predict(Dataset &data, uint32_t transformation, T clipMin, T clipMax) noexcept
         {
-            mMachine.Compute(data, mBestCode.mCode, transformation, clipMin, clipMax);
+            mMachine.ComputeOLS(data, mBestCode.mCode, mBestCode.mCoeffs[0], mBestCode.mCoeffs[1]);
         }
 
         void Predict(Dataset &data, uint32_t transformation, uint32_t id, T clipMin, T clipMax) noexcept
         {
             auto &hc = mPopulation[id];
-            mMachine.Compute(data, hc.Best().mCode, transformation, clipMin, clipMax);
+            mMachine.ComputeOLS(data, hc.Best().mCode, hc.Best().mCoeffs[0], hc.Best().mCoeffs[1]);
         }
 
         const auto &GetBestCode()
@@ -173,7 +189,7 @@ namespace SymbolicRegression::HillClimb
             {
                 if (hc.Best().mScore[2] > (1.0 + alpha) * bestScore)
                     continue;
-                hc.Best().mScore[3] = Evaluate(data, hc.Best(), fp);
+                hc.Best().mScore[3] = EvaluateOLS(data, hc.Best(), mFullSet, 3);
                 if (hc.Best().mScore[3] < bestScore)
                 {
                     bestScore = hc.Best().mScore[3];
@@ -206,8 +222,10 @@ namespace SymbolicRegression::HillClimb
 
             c.mCode.IsConstExpression(indices.data(), mCodeMapping.set);
             auto str = c.mCode.GetString(mCodeMapping.set);
+            std::ostringstream out;
 
-            return str;
+            out << c.mCoeffs[0] << "+" << c.mCoeffs[1] << "*" << str;
+            return out.str();
         }
 
         const Config &GetConfig() const noexcept
@@ -233,10 +251,10 @@ namespace SymbolicRegression::HillClimb
             std::vector<size_t> bs(1);
             bs[0] = mRandom.Rand(data.BatchCount());
 
-            for (auto& hc : mPopulation)
+            for (auto &hc : mPopulation)
             {
                 hc.mSmallSet.resize(smallSize);
-                for(auto &batch : hc.mSmallSet)
+                for (auto &batch : hc.mSmallSet)
                 {
                     batch = mRandom.Rand(data.BatchCount());
                 }
@@ -290,6 +308,15 @@ namespace SymbolicRegression::HillClimb
             return x;
         }
 
+        auto EvaluateOLS(const Dataset &data, EvaluatedCode<T> &evc, const std::vector<size_t> &batchSelection, int id) noexcept
+        {
+            auto [err, B0, B1] = mMachine.ComputeScoreOLS(data, evc.mCode, batchSelection, mBuffX, mBuffY);
+            evc.mScore[id] = err;
+            evc.mCoeffs[0] = B0;
+            evc.mCoeffs[1] = B1;
+            return err;
+        }
+
         auto Evaluate(const Dataset &data, const EvaluatedCode<T> &evc, const FitParams &fp) noexcept
         {
             Utils::Result r;
@@ -311,7 +338,7 @@ namespace SymbolicRegression::HillClimb
                     bestIdx = idx;
                 }
             }
-            return std::pair{ &mPopulation[bestIdx], bestIdx };
+            return std::pair{&mPopulation[bestIdx], bestIdx};
         }
 
     private:
@@ -326,5 +353,8 @@ namespace SymbolicRegression::HillClimb
         EvaluatedCode<T> mBestCode;
 
         std::vector<size_t> mFullSet;
+
+        T *__restrict mBuffX;
+        T *__restrict mBuffY;
     };
 }
