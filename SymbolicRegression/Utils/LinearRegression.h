@@ -87,7 +87,7 @@ namespace SymbolicRegression::Utils
     }
 
     template <typename T>
-    void moment_matrix_2(const T *__restrict X[2], const T *__restrict y, T *M, size_t size) noexcept
+    void moment_matrix_2(const T *__restrict X[2], const T *__restrict y, T *__restrict M, size_t size) noexcept
     {
         for (auto i = 0; i < 2; i++)
             M[i] = static_cast<T>(0.0);
