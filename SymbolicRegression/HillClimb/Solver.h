@@ -152,7 +152,7 @@ namespace SymbolicRegression::HillClimb
                 {
                     if (bestCode.mScore[1] < hillclimber->Best().mScore[1] * 1.15)
                     {
-                        const auto worstBatch = EvaluateOLS(data, bestCode, hillclimber->mBigSet, 2);
+                        [[maybe_unused]]const auto worstBatch = EvaluateOLS(data, bestCode, hillclimber->mBigSet, 2);
                         if (bestCode.mScore[2] < hillclimber->Best().mScore[2])
                         {
                             // bestCode.mScore[0] = worstBatch.second;
@@ -166,12 +166,12 @@ namespace SymbolicRegression::HillClimb
             return EvalPopulation(data, fp);
         }
 
-        void Predict(Dataset &data, uint32_t transformation, T clipMin, T clipMax) noexcept
+        void Predict(Dataset &data, [[maybe_unused]] uint32_t transformation, [[maybe_unused]] T clipMin, [[maybe_unused]] T clipMax) noexcept
         {
             mMachine.ComputeOLS(data, mBestCode.mCode, mBestCode.mCoeffs[0], mBestCode.mCoeffs[1]);
         }
 
-        void Predict(Dataset &data, uint32_t transformation, uint32_t id, T clipMin, T clipMax) noexcept
+        void Predict(Dataset &data, [[maybe_unused]] uint32_t transformation, uint32_t id, [[maybe_unused]] T clipMin, [[maybe_unused]] T clipMax) noexcept
         {
             auto &hc = mPopulation[id];
             mMachine.ComputeOLS(data, hc.Best().mCode, hc.Best().mCoeffs[0], hc.Best().mCoeffs[1]);
@@ -182,7 +182,7 @@ namespace SymbolicRegression::HillClimb
             return mBestCode;
         }
 
-        double EvalPopulation(const Dataset &data, const FitParams &fp, double alpha = 0.05) noexcept
+        double EvalPopulation(const Dataset &data, [[maybe_unused]]const FitParams &fp, double alpha = 0.05) noexcept
         {
             auto bestScore = mBestCode.mScore[3];
             for (auto &hc : mPopulation)

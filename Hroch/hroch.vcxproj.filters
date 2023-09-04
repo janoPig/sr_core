@@ -129,5 +129,8 @@
     <ClInclude Include="..\SymbolicRegression\HillClimb\EvaluatedCode.h">
       <Filter>SymbolicRegression\HillClimb</Filter>
     </ClInclude>
+    <ClInclude Include="..\SymbolicRegression\Utils\LinearRegression.h">
+      <Filter>SymbolicRegression\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

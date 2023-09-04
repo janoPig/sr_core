@@ -107,7 +107,15 @@ namespace SymbolicRegression::Computer
 				const auto y2 = B[0] + B[1] * buff_x[i];
 				err += (buff_y[i] - y2) * (buff_y[i] - y2);
 			}
-			return Result{err / (batchSelection.size() * BATCH), B[0], B[1]};
+			if (Utils::IsFinite(err))
+			{
+				err /= (batchSelection.size() * BATCH);
+			}
+			else
+			{
+				err = LARGE_FLOAT;
+			}
+			return Result{err , B[0], B[1]};
 		}
 
 		void ComputeOLS(Dataset &data, const Code<T> &code, T B0, T B1) noexcept

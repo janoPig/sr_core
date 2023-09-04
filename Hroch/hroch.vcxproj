@@ -297,6 +297,7 @@
     <ClInclude Include="..\SymbolicRegression\Utils\BatchVector.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Dataset.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Evaluate.h" />
+    <ClInclude Include="..\SymbolicRegression\Utils\LinearRegression.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Rand.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Utils.h" />
     <ClInclude Include="Inteface.h" />
