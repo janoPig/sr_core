@@ -171,7 +171,7 @@ namespace SymbolicRegression::Utils
         // tmp_2 = 0.10014304518699645996 + (-3.08318519592285156250);
         const auto tmp_3 = tmp_0 / (T)0.18211431801319122314;
         const auto tmp_4 = tmp_3 + (T)0.00424051098525524139;
-        const auto tmp_5 = tmp_1 - (T)-2.98304215073585510254; //- tmp_2;
+        const auto tmp_5 = tmp_1 - (T)2.98304215073585510254; //+ tmp_2;
         const auto tmp_6 = (T)0.18998736143112182617 + tmp_3;
         const auto tmp_7 = x / tmp_4;
         const auto tmp_8 = tmp_7 + tmp_6;
