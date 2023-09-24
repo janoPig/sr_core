@@ -332,10 +332,13 @@ int GetBestModel(void *hsolver, math_model *model)
 		const auto info = best->GetBestInfo();
 		model->score = info.mScore;
 		model->str_representation = new char[info.mEquation.size() + 1];
+		model->str_code_representation = new char[info.mCode.size() + 1];
 #ifdef _WIN32
 		strcpy_s(model->str_representation, info.mEquation.size() + 1, info.mEquation.c_str());
+		strcpy_s(model->str_code_representation, info.mCode.size() + 1, info.mCode.c_str());
 #else
 		strcpy(model->str_representation, info.mEquation.c_str());
+		strcpy(model->str_code_representation, info.mCode.c_str());
 #endif
 		return 0;
 	}
@@ -350,15 +353,18 @@ int GetModel(void *hsolver, unsigned long long id, math_model *model)
 	if (thread_id > solver.mSolvers.size())
 		return 1;
 
-	const auto info = solver.mSolvers[thread_id]->GetInfo(pop_id);
+	const auto info = solver.mSolvers[thread_id]->GetInfo(thread_id, pop_id);
 	model->score = info.mScore;
 	model->partial_score = info.mPartialScore;
 	model->id = id;
 	model->str_representation = new char[info.mEquation.size() + 1];
+	model->str_code_representation = new char[info.mCode.size() + 1];
 #ifdef _WIN32
 	strcpy_s(model->str_representation, info.mEquation.size() + 1, info.mEquation.c_str());
+	strcpy_s(model->str_code_representation, info.mCode.size() + 1, info.mCode.c_str());
 #else
 	strcpy(model->str_representation, info.mEquation.c_str());
+	strcpy(model->str_code_representation, info.mCode.c_str());
 #endif
 	return 0;
 }

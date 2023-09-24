@@ -52,24 +52,23 @@ namespace SymbolicRegression::Computer::Instructions
         f_nimpl
     };
 
-#define DEF_INSTR(name, op, code)                                                                     \
-    struct instruction_##name                                                                         \
-    {                                                                                                 \
-        constexpr static uint32_t operands = op;                                                      \
-        constexpr static InstructionID id = InstructionID::name;                                      \
-        template <typename T>                                                                         \
-        constexpr T operator()([[maybe_unused]] const T a, [[maybe_unused]] const T b) const noexcept \
-        {                                                                                             \
-            (void)b;                                                                                  \
-            return (code);                                                                            \
-        }                                                                                             \
-        constexpr auto get_name() const noexcept                                                      \
-        {                                                                                             \
-            return #name;                                                                             \
-        }                                                                                             \
-        constexpr auto get_code() const noexcept                                                      \
-        {                                                                                             \
-            return #code;                                                                             \
-        }                                                                                             \
+#define DEF_INSTR(name, op, code)                                                    \
+    struct instruction_##name                                                        \
+    {                                                                                \
+        constexpr static uint32_t operands = op;                                     \
+        constexpr static InstructionID id = InstructionID::name;                     \
+        template <typename T>                                                        \
+        constexpr T operator()(const T a, [[maybe_unused]] const T b) const noexcept \
+        {                                                                            \
+            return (code);                                                           \
+        }                                                                            \
+        constexpr auto get_name() const noexcept                                     \
+        {                                                                            \
+            return #name;                                                            \
+        }                                                                            \
+        constexpr auto get_code() const noexcept                                     \
+        {                                                                            \
+            return #code;                                                            \
+        }                                                                            \
     }
 }

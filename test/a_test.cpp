@@ -22,7 +22,7 @@ inline void test_callback(const uint64_t it, const double err)
               << " time: " << duration.count() * 0.001 << "   MSE: " << err << "   RMSE: " << sqrt(err) << std::endl;
 }
 
-void run_test(const char *path)
+void run_test(const char *path, size_t iter_count = (size_t)-1)
 {
     CsvFile csv(path);
     const auto samplesCount = csv.RowsCount();
@@ -48,7 +48,7 @@ void run_test(const char *path)
         .mVerbose = 2,
         .mTournament = 4,
         .mMetric = 0, // MSE
-        .mIterLimit = 10000000000ull,
+        .mIterLimit = iter_count,
         .mConstSettings = {.mMin = -1e30, .mMax = 1e30, .mPredefinedProb = 0.001, .mPredefinedSet = {0.0, 1.0, -1.0, 3.141592654}},
         .mInstrProbs = Srl::Computer::Instructions::AdvancedMath,
         .mFeatProbs = featProbs};
@@ -85,11 +85,16 @@ void run_test(const char *path)
 
     testStart = high_resolution_clock::now();
     solver.Fit(data, fp, test_callback);
+
+    // const auto info = solver.GetBestInfo();
+    // std::cout << info.mCode;
+    // const auto info2 = solver.GetInfo(0, 0);
+    // std::cout << info2.mCode;
 }
 
 int main(int /*argc*/, char * /*argv*/[])
 {
-    run_test("../test/586_fri_c3_1000_25.tsd");
+    run_test("../test/586_fri_c3_1000_25.tsd" /*, 10000*/);
 
     return 0;
 }

@@ -245,6 +245,135 @@ namespace SymbolicRegression::Computer
             return tmp[mCodeSize - 1];
         }
 
+        auto GenerateCode(const std::vector<CodeGen::InstructionInfo> &set, const std::string &funcName) const noexcept
+        {
+            std::string result = "def " + funcName + "(x):\n";
+
+            auto parse = [&](size_t idx, bool isConst) -> std::string
+            {
+                if (isConst)
+                {
+                    if (mConstants[(uint32_t)idx] < (T)0)
+                        return "(" + Utils::ToStringWithPrecision(mConstants[(uint32_t)idx]) + ")";
+                    else
+                        return Utils::ToStringWithPrecision(mConstants[(uint32_t)idx]);
+                }
+                else if (idx < mInputSize)
+                    return "x[" + std::to_string(idx) + "]";
+                else
+                    return "tmp_" + std::to_string(idx - CodeStart());
+            };
+
+            for (size_t i = 0; i < mCodeSize; i++)
+            {
+                const auto &instr = mCodeInstructions[i];
+                if (!instr.mUsed)
+                    continue;
+                const auto &info = set[static_cast<uint32_t>(instr.mOpCode)];
+
+                std::string tmp = info.name;
+                std::string _op = ",";
+                std::string _uop = "";
+                if (info.name == "add")
+                {
+                    _op = "+";
+                    tmp = "";
+                }
+                if (info.name == "mul")
+                {
+                    _op = "*";
+                    tmp = "";
+                }
+                if (info.name == "div")
+                {
+                    _op = "/";
+                    tmp = "";
+                }
+                if (info.name == "sub")
+                {
+                    _op = "-";
+                    tmp = "";
+                }
+                if (info.name == "lt")
+                {
+                    _op = "<";
+                    tmp = "";
+                }
+                if (info.name == "gt")
+                {
+                    _op = ">";
+                    tmp = "";
+                }
+                if (info.name == "lte")
+                {
+                    _op = "<=";
+                    tmp = "";
+                }
+                if (info.name == "gte")
+                {
+                    _op = ">=";
+                    tmp = "";
+                }
+                if (info.name == "inv")
+                {
+                    _uop = "-";
+                    tmp = "";
+                }
+                if (info.name == "minv")
+                {
+                    _uop = "1.0/";
+                    tmp = "";
+                }
+                if (info.name == "sq2")
+                {
+                    tmp = "";
+                }
+                if (info.name == "nop")
+                {
+                    tmp = "";
+                }
+                if (info.name == "f_and")
+                {
+                    _op = "&";
+                    tmp = "";
+                }
+                if (info.name == "f_or")
+                {
+                    _op = "|";
+                    tmp = "";
+                }
+                if (info.name == "f_xor")
+                {
+                    _op = "^";
+                    tmp = "";
+                }
+                if (info.name == "f_not")
+                {
+                    _uop = "~";
+                    tmp = "";
+                }
+
+                if (info.op > 0)
+                    tmp += _uop + parse(instr.mSrc[0], instr.mConst[0]);
+
+                if (info.op > 1)
+                {
+                    tmp += _op + parse(instr.mSrc[1], instr.mConst[1]);
+                }
+                if (info.name == "sq2")
+                {
+                    tmp += "**2";
+                }
+
+                std::string line = "\ttmp_" + std::to_string(i) + " = " + tmp + "\n";
+                result += line;
+            }
+
+            result += std::string("\treturn ") + "tmp_" + std::to_string(mCodeSize - 1) + "\n";
+
+            return result;
+        }
+
         uint32_t mInputSize{};
         uint32_t mCodeSize{};
         std::vector<T> mConstants{};
