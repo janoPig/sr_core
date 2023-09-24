@@ -56,6 +56,13 @@ namespace SymbolicRegression::Computer
 					score = 1.0 - std::abs(Utils::ComputePseudoKendall(data.BatchY(batchIdx), yPred, BATCH));
 				else if (metric == 4)
 					score = Utils::ComputeLogLoss(data.BatchY(batchIdx), yPred, BATCH);
+				// Test aprox log-loss
+				else if (metric == 11)
+					score = Utils::ApproxLogLoss_1(data.BatchY(batchIdx), yPred, BATCH);
+				else if (metric == 12)
+					score = Utils::ApproxLogLoss_2(data.BatchY(batchIdx), yPred, BATCH);
+				else if (metric == 13)
+					score = Utils::ApproxLogLoss_3(data.BatchY(batchIdx), yPred, BATCH);
 
 				r.mScore += score;
 
