@@ -2,47 +2,27 @@
 
 namespace SymbolicRegression::Computer::CodeGen
 {
-    template <typename T>
-    constexpr const char *type_name() noexcept
-    {
-        if constexpr (std::is_same<T, bool>::value)
-            return "bool";
-        if constexpr (std::is_same<T, int32_t>::value)
-            return "int32_t";
-        if constexpr (std::is_same<T, uint32_t>::value)
-            return "uint32_t";
-        if constexpr (std::is_same<T, float>::value)
-            return "float";
-        if constexpr (std::is_same<T, double>::value)
-            return "double";
-        return "unknow_type";
-    }
-
-    template <typename T, typename instruction>
+    template <typename instruction>
     std::string generate_function(const instruction &instr)
     {
-        auto type = type_name<T>();
-        std::string ret;
-        ret += "inline ";
+        std::string ret = "template<typename T>\n";
+        ret += "inline T instruction_";
         ret += instr.get_name();
-        ret += "(const ";
-        ret += type;
-        ret += " a, const ";
-        ret += type;
-        ret += " b) noexcept\n";
+        ret += "(const T a, [[maybe_unused]] const T b) noexcept\n";
         ret += "{\n    return ";
         ret += instr.get_code();
-        ret += ";\n}\n";
+        ret += ";\n}\n\n";
 
         return ret;
     }
 
-    template <typename T, typename iset>
-    std::string generate_instructions_set(const iset &set)
+    template <typename iset>
+    std::string generate_instructions_set()
     {
         std::string ret;
+        const iset set{};
         std::apply([&ret](const auto &...i)
-                   { ((ret += generate_function<T>(i)), ...); },
+                   { ((ret += generate_function(i)), ...); },
                    set);
         return ret;
     }

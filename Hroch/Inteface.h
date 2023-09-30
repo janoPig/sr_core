@@ -53,6 +53,7 @@ struct math_model
     double score;
     double partial_score;
     char *str_representation;
+    char *str_code_representation;
 };
 
 extern "C" EXPORT void *CreateSolver(const solver_params *params);

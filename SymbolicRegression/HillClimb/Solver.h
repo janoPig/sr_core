@@ -14,6 +14,7 @@ namespace SymbolicRegression::HillClimb
         double mScore;
         double mPartialScore;
         std::string mEquation;
+        std::string mCode;
     };
 
     template <typename T, size_t BATCH, bool DBG = false>
@@ -190,13 +191,14 @@ namespace SymbolicRegression::HillClimb
 
         CodeInfo GetBestInfo() noexcept
         {
-            return CodeInfo{mBestCode.mScore[3], mBestCode.mScore[2], GetExpression(mBestCode)};
+            return CodeInfo{mBestCode.mScore[3], mBestCode.mScore[2], GetExpression(mBestCode), GenerateCode(mBestCode, "equation")};
         }
 
-        CodeInfo GetInfo(size_t idx) noexcept
+        CodeInfo GetInfo(size_t threadIdx, size_t idx) noexcept
         {
             auto &code = mPopulation[idx].Best();
-            return CodeInfo{code.mScore[3], code.mScore[2], GetExpression(code)};
+            const std::string eq_name = "equation_" + std::to_string(threadIdx) + "_" + std::to_string(idx);
+            return CodeInfo{code.mScore[3], code.mScore[2], GetExpression(code), GenerateCode(code, eq_name)};
         }
 
         std::string GetExpression(EvaluatedCode<T> &c) noexcept
@@ -206,6 +208,17 @@ namespace SymbolicRegression::HillClimb
 
             c.mCode.IsConstExpression(indices.data(), mCodeMapping.set);
             auto str = c.mCode.GetString(mCodeMapping.set);
+
+            return str;
+        }
+
+        std::string GenerateCode(EvaluatedCode<T> &c, const std::string &eqName) noexcept
+        {
+            std::vector<uint32_t> indices;
+            indices.reserve((size_t)mConfig.mCodeSettings.mMaxCodeSize * 2);
+
+            c.mCode.IsConstExpression(indices.data(), mCodeMapping.set);
+            auto str = c.mCode.GenerateCode(mCodeMapping.set, eqName);
 
             return str;
         }
@@ -233,10 +246,10 @@ namespace SymbolicRegression::HillClimb
             std::vector<size_t> bs(1);
             bs[0] = mRandom.Rand(data.BatchCount());
 
-            for (auto& hc : mPopulation)
+            for (auto &hc : mPopulation)
             {
                 hc.mSmallSet.resize(smallSize);
-                for(auto &batch : hc.mSmallSet)
+                for (auto &batch : hc.mSmallSet)
                 {
                     batch = mRandom.Rand(data.BatchCount());
                 }
@@ -311,7 +324,7 @@ namespace SymbolicRegression::HillClimb
                     bestIdx = idx;
                 }
             }
-            return std::pair{ &mPopulation[bestIdx], bestIdx };
+            return std::pair{&mPopulation[bestIdx], bestIdx};
         }
 
     private:

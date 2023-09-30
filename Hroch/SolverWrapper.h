@@ -31,7 +31,7 @@ namespace Hroch
         virtual void Predict(DataSetD &, uint32_t, uint32_t, double, double) = 0;
         virtual double Score() const noexcept = 0;
         virtual HillClimb::CodeInfo GetBestInfo() = 0;
-        virtual HillClimb::CodeInfo GetInfo(size_t idx) noexcept = 0;
+        virtual HillClimb::CodeInfo GetInfo(size_t threadId, size_t idx) noexcept = 0;
         virtual const Config &GetConfig() const noexcept = 0;
     };
 
@@ -113,9 +113,9 @@ namespace Hroch
             return SolverType::GetBestInfo();
         }
 
-        HillClimb::CodeInfo GetInfo(size_t idx) noexcept override
+        HillClimb::CodeInfo GetInfo(size_t threadId, size_t idx) noexcept override
         {
-            return SolverType::GetInfo(idx);
+            return SolverType::GetInfo(threadId, idx);
         }
 
         const Config &GetConfig() const noexcept override
