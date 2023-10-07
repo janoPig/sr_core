@@ -23,12 +23,13 @@ namespace SymbolicRegression::Computer
 		{
 		}
 
-		auto ComputeScore(const Dataset &data, const Code<T> &code, const std::vector<size_t> &batchSelection, Utils::Result &r, uint32_t transformation, uint32_t metric, T clipMin, T clipMax, bool filter = true) noexcept
+		auto ComputeScore(const Dataset &data, const Code<T> &code, const std::vector<size_t> &batchSelection, Utils::Result &r, uint32_t transformation, uint32_t metric, T clipMin, T clipMax, T cw0, T cw1, bool filter = true) noexcept
 		{
 			auto maxError = 0.0;
 			size_t worstIdx = 0;
 			T *__restrict yPred = mMemory[code.Size() - 1];
 			const auto clip = clipMin < clipMax;
+			const auto cw = cw0 != cw1;
 
 			for (const auto batchIdx : batchSelection)
 			{
@@ -55,7 +56,16 @@ namespace SymbolicRegression::Computer
 				else if (metric == 3)
 					score = 1.0 - std::abs(Utils::ComputePseudoKendall(data.BatchY(batchIdx), yPred, BATCH));
 				else if (metric == 4)
-					score = Utils::ComputeLogLoss(data.BatchY(batchIdx), yPred, BATCH);
+				{
+					if (cw)
+					{
+						score = Utils::ComputeLogLoss<T, true>(data.BatchY(batchIdx), yPred, BATCH, cw0, cw1);
+					}
+					else
+					{
+						score = Utils::ComputeLogLoss<T, false>(data.BatchY(batchIdx), yPred, BATCH);
+					}
+				}
 				// Test aprox log-loss
 				else if (metric == 11)
 					score = Utils::ApproxLogLoss_1(data.BatchY(batchIdx), yPred, BATCH);
@@ -63,6 +73,17 @@ namespace SymbolicRegression::Computer
 					score = Utils::ApproxLogLoss_2(data.BatchY(batchIdx), yPred, BATCH);
 				else if (metric == 13)
 					score = Utils::ApproxLogLoss_3(data.BatchY(batchIdx), yPred, BATCH);
+				else if (metric == 20)
+				{
+					if (cw)
+					{
+						score = Utils::ApproxLogit<T, true>(data.BatchY(batchIdx), yPred, BATCH, cw0, cw1);
+					}
+					else
+					{
+						score = Utils::ApproxLogit<T, false>(data.BatchY(batchIdx), yPred, BATCH);
+					}
+				}
 
 				r.mScore += score;
 

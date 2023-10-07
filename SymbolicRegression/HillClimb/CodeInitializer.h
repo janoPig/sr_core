@@ -31,7 +31,7 @@ namespace SymbolicRegression
                 }
                 else
                 {
-                    instr.mSrc[I] = mRandom.Rand((uint32_t)j + c.CodeStart());
+                    instr.mSrc[I] = mRandom.Rand((uint32_t)j) + c.CodeStart();
                     instr.mConst[I] = false;
                 }
             };

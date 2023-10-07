@@ -105,13 +105,35 @@ namespace SymbolicRegression::Utils
         return LARGE_FLOAT;
     }
 
-    template <typename T>
-    double ComputeLogLoss(const T *const __restrict yTrue, const T *const __restrict yPred, const size_t size) noexcept
+    template <typename T, bool CW>
+    double ComputeLogLoss(const T *const __restrict yTrue, const T *const __restrict yPred, const size_t size, T cw0 = (T)1.0, T cw1 = (T)1.0) noexcept
     {
         T err{};
         for (size_t n = 0; n < size; n++)
         {
-            err += -(yTrue[n] * std::log(yPred[n]) + (static_cast<T>(1.0) - yTrue[n]) * std::log(static_cast<T>(1.0) - yPred[n]));
+            if (yTrue[n] > (T)0.999999)
+            {
+                if constexpr (CW)
+                {
+                    err += cw1 * (-std::log(yPred[n]));
+                }
+                else
+                {
+                    err += -std::log(yPred[n]);
+                }
+                // err += -(yTrue[n] * std::log(yPred[n]) + (static_cast<T>(1.0) - yTrue[n]) * std::log(static_cast<T>(1.0) - yPred[n]));
+            }
+            else
+            {
+                if constexpr (CW)
+                {
+                    err += -cw0 * std::log(static_cast<T>(1.0) - yPred[n]);
+                }
+                else
+                {
+                    err += -std::log(static_cast<T>(1.0) - yPred[n]);
+                }
+            }
         }
 
         if (IsFinite(err))
@@ -218,6 +240,69 @@ namespace SymbolicRegression::Utils
         for (size_t n = 0; n < size; n++)
         {
             err += -(yTrue[n] * __log_test_3(yPred[n]) + (static_cast<T>(1.0) - yTrue[n]) * __log_test_3(static_cast<T>(1.0) - yPred[n]));
+        }
+
+        if (IsFinite(err))
+        {
+            return static_cast<double>(err);
+        }
+        return LARGE_FLOAT;
+    }
+
+    template <typename T>
+    constexpr T __logit_test(const T x) noexcept
+    {
+        if (x == 0)
+            return 0.69314718056f;
+        else if (x < -20)
+            return -x;
+        else if (x > 20)
+            return 0.0;
+        const auto tmp_0 = x * x;
+        const auto tmp_1 = 22.52812767028808593750 + tmp_0;
+        const auto tmp_2 = x * 0.00897947046905755997;
+        const auto tmp_3 = tmp_0 * tmp_2;
+        const auto tmp_5 = tmp_3 + x;
+        const auto tmp_6 = tmp_5 + x;
+        const auto tmp_7 = tmp_6 / tmp_1;
+        const auto tmp_9 = tmp_7 / tmp_2;
+        const auto tmp_10 = tmp_9 + tmp_9;
+        const auto tmp_11 = (-53.71286010742187500000) / tmp_10;
+        const auto tmp_12 = (-0.25884103775024414062) + tmp_7;
+        const auto tmp_15 = tmp_11 + x;
+        const auto tmp_17 = tmp_15;
+        const auto tmp_19 = tmp_17 * tmp_12;
+        return tmp_19;
+    }
+
+    template <typename T, bool CW>
+    __attribute__((noinline)) double ApproxLogit(const T *const __restrict yTrue, const T *const __restrict yPred, const size_t size, T cw0 = (T)1.0, T cw1 = (T)1.0) noexcept
+    {
+        T err{};
+        for (size_t n = 0; n < size; n++)
+        {
+            if (yTrue[n] > (T)0.999999)
+            {
+                if constexpr (CW)
+                {
+                    err += cw1 * __logit_test(yPred[n]);
+                }
+                else
+                {
+                    err += __logit_test(yPred[n]);
+                }
+            }
+            else
+            {
+                if constexpr (CW)
+                {
+                    err += cw0 * __logit_test(-yPred[n]);
+                }
+                else
+                {
+                    err += __logit_test(-yPred[n]);
+                }
+            }
         }
 
         if (IsFinite(err))
