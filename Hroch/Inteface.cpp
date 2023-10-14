@@ -309,6 +309,26 @@ int Predict64(void *hsolver, const double *X, double *y, unsigned int rows, unsi
 	return Predict(*solver, X, y, rows, xcols, params);
 }
 
+void GetModel(const SymbolicRegression::HillClimb::CodeInfo info, math_model *model)
+{
+	model->score = info.mScore;
+	model->partial_score = info.mPartialScore;
+	model->str_representation = new char[info.mEquation.size() + 1];
+	model->str_code_representation = new char[info.mCode.size() + 1];
+#ifdef _WIN32
+	strcpy_s(model->str_representation, info.mEquation.size() + 1, info.mEquation.c_str());
+	strcpy_s(model->str_code_representation, info.mCode.size() + 1, info.mCode.c_str());
+#else
+	strcpy(model->str_representation, info.mEquation.c_str());
+	strcpy(model->str_code_representation, info.mCode.c_str());
+#endif
+	model->used_constants_count = static_cast<uint32_t>(info.mConstants.size());
+	if (model->used_constants_count)
+	{
+		model->used_constants = new double[info.mConstants.size()];
+	}
+}
+
 int GetBestModel(void *hsolver, math_model *model)
 {
 	SolverHandle &solver = *((SolverHandle *)hsolver);
@@ -325,16 +345,7 @@ int GetBestModel(void *hsolver, math_model *model)
 	if (best)
 	{
 		const auto info = best->GetBestInfo();
-		model->score = info.mScore;
-		model->str_representation = new char[info.mEquation.size() + 1];
-		model->str_code_representation = new char[info.mCode.size() + 1];
-#ifdef _WIN32
-		strcpy_s(model->str_representation, info.mEquation.size() + 1, info.mEquation.c_str());
-		strcpy_s(model->str_code_representation, info.mCode.size() + 1, info.mCode.c_str());
-#else
-		strcpy(model->str_representation, info.mEquation.c_str());
-		strcpy(model->str_code_representation, info.mCode.c_str());
-#endif
+		GetModel(info, model);
 		return 0;
 	}
 	return 1;
@@ -349,17 +360,16 @@ int GetModel(void *hsolver, unsigned long long id, math_model *model)
 		return 1;
 
 	const auto info = solver.mSolvers[thread_id]->GetInfo(thread_id, pop_id);
-	model->score = info.mScore;
-	model->partial_score = info.mPartialScore;
+
+	GetModel(info, model);
 	model->id = id;
-	model->str_representation = new char[info.mEquation.size() + 1];
-	model->str_code_representation = new char[info.mCode.size() + 1];
-#ifdef _WIN32
-	strcpy_s(model->str_representation, info.mEquation.size() + 1, info.mEquation.c_str());
-	strcpy_s(model->str_code_representation, info.mCode.size() + 1, info.mCode.c_str());
-#else
-	strcpy(model->str_representation, info.mEquation.c_str());
-	strcpy(model->str_code_representation, info.mCode.c_str());
-#endif
+
 	return 0;
+}
+
+int FreeModel(math_model *model)
+{
+	delete[] model->str_representation;
+	delete[] model->str_code_representation;
+	delete[] model->used_constants;
 }

@@ -245,25 +245,28 @@ namespace SymbolicRegression::Computer
             return tmp[mCodeSize - 1];
         }
 
+        auto GetConstants() const noexcept
+        {
+            if (!mUsedConst.empty())
+            {
+                std::vector<double> result(mUsedConst.size());
+                for (size_t i = 0; i < mUsedConst.size(); i++)
+                {
+                    result[i] = static_cast<double>(mConstants[mUsedConst[i]]);
+                }
+                return result;
+            }
+            return std::vector<double>{};
+        }
+
         auto GenerateCode(const std::vector<CodeGen::InstructionInfo> &set, const std::string &funcName) const noexcept
         {
-            std::string result = "def " + funcName + "(x):\n";
-
-            auto parse = [&](size_t idx, bool isConst) -> std::string
-            {
-                if (isConst)
-                {
-                    if (mConstants[(uint32_t)idx] < (T)0)
-                        return "(" + Utils::ToStringWithPrecision(mConstants[(uint32_t)idx]) + ")";
-                    else
-                        return Utils::ToStringWithPrecision(mConstants[(uint32_t)idx]);
-                }
-                else if (idx < mInputSize)
-                    return "x[" + std::to_string(idx) + "]";
-                else
-                    return "tmp_" + std::to_string(idx - CodeStart());
-            };
-
+            std::unordered_map<uint32_t, uint32_t> m{};
+            uint32_t i = 0;
+            std::transform(mUsedConst.begin(), mUsedConst.end(), std::inserter(m, m.end()),
+                           [&i](const int &s)
+                           { return std::make_pair(s, i++); });
+            std::string result = "def " + funcName + "(x, c):\n";
             for (size_t i = 0; i < mCodeSize; i++)
             {
                 const auto &instr = mCodeInstructions[i];
@@ -271,102 +274,137 @@ namespace SymbolicRegression::Computer
                     continue;
                 const auto &info = set[static_cast<uint32_t>(instr.mOpCode)];
 
-                std::string tmp = info.name;
-                std::string _op = ",";
-                std::string _uop = "";
-                if (info.name == "add")
+                auto parse = [&](uint32_t idx) -> std::string
                 {
-                    _op = "+";
-                    tmp = "";
-                }
-                if (info.name == "mul")
-                {
-                    _op = "*";
-                    tmp = "";
-                }
-                if (info.name == "div")
-                {
-                    _op = "/";
-                    tmp = "";
-                }
-                if (info.name == "sub")
-                {
-                    _op = "-";
-                    tmp = "";
-                }
-                if (info.name == "lt")
-                {
-                    _op = "<";
-                    tmp = "";
-                }
-                if (info.name == "gt")
-                {
-                    _op = ">";
-                    tmp = "";
-                }
-                if (info.name == "lte")
-                {
-                    _op = "<=";
-                    tmp = "";
-                }
-                if (info.name == "gte")
-                {
-                    _op = ">=";
-                    tmp = "";
-                }
-                if (info.name == "inv")
-                {
-                    _uop = "-";
-                    tmp = "";
-                }
-                if (info.name == "minv")
-                {
-                    _uop = "1.0/";
-                    tmp = "";
-                }
-                if (info.name == "sq2")
-                {
-                    tmp = "";
-                }
-                if (info.name == "nop")
-                {
-                    tmp = "";
-                }
-                if (info.name == "f_and")
-                {
-                    _op = "&";
-                    tmp = "";
-                }
-                if (info.name == "f_or")
-                {
-                    _op = "|";
-                    tmp = "";
-                }
-                if (info.name == "f_xor")
-                {
-                    _op = "^";
-                    tmp = "";
-                }
-                if (info.name == "f_not")
-                {
-                    _uop = "~";
-                    tmp = "";
-                }
+                    if (instr.mConst[idx])
+                    {
+                        if (auto it = m.find(instr.mSrc[idx]); it != m.end())
+                        {
+                            return "c[" + std::to_string(it->second) + "]";
+                        }
+                        else
+                        {
+                            return "error";
+                        }
+                    }
+                    else if (instr.mSrc[idx] < mInputSize)
+                        return "x[" + std::to_string(instr.mSrc[idx]) + "]";
+                    else
+                        return "tmp_" + std::to_string(instr.mSrc[idx] - CodeStart());
+                };
 
-                if (info.op > 0)
-                    tmp += _uop + parse(instr.mSrc[0], instr.mConst[0]);
+#define HANDLE_SYMBOL(iid, fn)                                     \
+    case iid:                                                      \
+        result += "\ttmp_" + std::to_string(i) + " = " + fn + "("; \
+        if (info.op > 0)                                           \
+            result += parse(0);                                    \
+        if (info.op > 1)                                           \
+            result += ", " + parse(1);                             \
+        result += ")\n";                                           \
+        break
 
-                if (info.op > 1)
-                {
-                    tmp += _op + parse(instr.mSrc[1], instr.mConst[1]);
-                }
-                if (info.name == "sq2")
-                {
-                    tmp += "**2";
-                }
+#define HANDLE_INEQUALITY(iid, code)                                                              \
+    case iid:                                                                                     \
+        result += "\ttmp_" + std::to_string(i) + " = (" + parse(0) + code + parse(1) + ")*1.0\n"; \
+        break
 
-                std::string line = "\ttmp_" + std::to_string(i) + " = " + tmp + "\n";
-                result += line;
+                switch (instr.mOpCode)
+                {
+                    HANDLE_SYMBOL(Instructions::InstructionID::nop, "");
+                    HANDLE_SYMBOL(Instructions::InstructionID::add, "numpy.add");
+                    HANDLE_SYMBOL(Instructions::InstructionID::sub, "numpy.subtract");
+                    HANDLE_SYMBOL(Instructions::InstructionID::mul, "numpy.multiply");
+                    HANDLE_SYMBOL(Instructions::InstructionID::div, "numpy.divide");
+                    HANDLE_SYMBOL(Instructions::InstructionID::inv, "numpy.negative");
+                    HANDLE_SYMBOL(Instructions::InstructionID::minv, "1.0/");
+                    HANDLE_SYMBOL(Instructions::InstructionID::sq2, "numpy.square");
+                case Instructions::InstructionID::pdiv:
+                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(0.00000001 + numpy.square(" + parse(1) + ")) # PDIV\n";
+                    break;
+                    HANDLE_SYMBOL(Instructions::InstructionID::max, "numpy.maximum");
+                    HANDLE_SYMBOL(Instructions::InstructionID::min, "numpy.minimum");
+                    HANDLE_SYMBOL(Instructions::InstructionID::abs, "numpy.absolute");
+                    HANDLE_SYMBOL(Instructions::InstructionID::floor, "numpy.floor");
+                    HANDLE_SYMBOL(Instructions::InstructionID::ceil, "numpy.ceil");
+                    HANDLE_INEQUALITY(Instructions::InstructionID::lt, " < ");
+                    HANDLE_INEQUALITY(Instructions::InstructionID::gt, " > ");
+                    HANDLE_INEQUALITY(Instructions::InstructionID::lte, " <= ");
+                    HANDLE_INEQUALITY(Instructions::InstructionID::gte, " >= ");
+                    HANDLE_SYMBOL(Instructions::InstructionID::pow, "numpy.power");
+                    HANDLE_SYMBOL(Instructions::InstructionID::exp, "numpy.exp");
+                    HANDLE_SYMBOL(Instructions::InstructionID::log, "numpy.log");
+                    HANDLE_SYMBOL(Instructions::InstructionID::sqrt, "numpy.sqrt");
+                    HANDLE_SYMBOL(Instructions::InstructionID::cbrt, "numpy.cbrt");
+                case Instructions::InstructionID::aq:
+                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(1.0 + numpy.square(" + parse(1) + ")) # AQ\n";
+                    break;
+                    HANDLE_SYMBOL(Instructions::InstructionID::sin, "numpy.sin");
+                    HANDLE_SYMBOL(Instructions::InstructionID::cos, "numpy.cos");
+                    HANDLE_SYMBOL(Instructions::InstructionID::tan, "numpy.tan");
+                    HANDLE_SYMBOL(Instructions::InstructionID::asin, "numpy.arcsin");
+                    HANDLE_SYMBOL(Instructions::InstructionID::acos, "numpy.arccos");
+                    HANDLE_SYMBOL(Instructions::InstructionID::atan, "numpy.arctan");
+                    HANDLE_SYMBOL(Instructions::InstructionID::sinh, "numpy.sinh");
+                    HANDLE_SYMBOL(Instructions::InstructionID::cosh, "numpy.cosh");
+                    HANDLE_SYMBOL(Instructions::InstructionID::tanh, "numpy.tanh");
+                case Instructions::InstructionID::f_and:
+                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " * " + parse(1) + " # F_AND\n";
+                    break;
+                case Instructions::InstructionID::f_or:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = " + a + " + " + b + " - " + a + " * " + b + " # F_OR\n";
+                }
+                break;
+                case Instructions::InstructionID::f_xor:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = " + a + " + " + b + " - 2.0 * " + a + " * " + b + " # F_XOR\n";
+                }
+                break;
+                case Instructions::InstructionID::f_impl:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = 1.0 - " + a + " + " + a + " * " + b + " # F_IMPL\n";
+                }
+                break;
+                case Instructions::InstructionID::f_not:
+                    result += "\ttmp_" + std::to_string(i) + " = 1.0 - " + parse(0) + " # F_NOT\n";
+                    break;
+                case Instructions::InstructionID::f_nand:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = 1.0 - " + a + " * " + b + " # F_NAND\n";
+                }
+                break;
+                case Instructions::InstructionID::f_nor:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = 1.0 - " + a + " - " + b + " + " + a + " * " + b + " # F_NOR\n";
+                }
+                break;
+                case Instructions::InstructionID::f_nxor:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = 1.0 - " + a + " - " + b + " + 2.0 * " + a + " * " + b + " # F_NXOR\n";
+                }
+                break;
+                case Instructions::InstructionID::f_nimpl:
+                {
+                    const auto a = parse(0);
+                    const auto b = parse(1);
+                    result += "\ttmp_" + std::to_string(i) + " = " + a + " * (1.0 -" + b + ") # F_NIMPL\n";
+                }
+                break;
+                default:
+                    break;
+                }
             }
 
             result += std::string("\treturn ") + "tmp_" + std::to_string(mCodeSize - 1) + "\n";
