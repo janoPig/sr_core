@@ -15,6 +15,7 @@ namespace SymbolicRegression::HillClimb
         double mPartialScore;
         std::string mEquation;
         std::string mCode;
+        std::vector<double> mConstants;
     };
 
     template <typename T, size_t BATCH, bool DBG = false>
@@ -192,14 +193,14 @@ namespace SymbolicRegression::HillClimb
 
         CodeInfo GetBestInfo() noexcept
         {
-            return CodeInfo{mBestCode.mScore[3], mBestCode.mScore[2], GetExpression(mBestCode), GenerateCode(mBestCode, "equation")};
+            return CodeInfo{mBestCode.mScore[3], mBestCode.mScore[2], GetExpression(mBestCode), GenerateCode(mBestCode, "equation"), mBestCode.mCode.GetConstants()};
         }
 
         CodeInfo GetInfo(size_t threadIdx, size_t idx) noexcept
         {
             auto &code = mPopulation[idx].Best();
             const std::string eq_name = "equation_" + std::to_string(threadIdx) + "_" + std::to_string(idx);
-            return CodeInfo{code.mScore[3], code.mScore[2], GetExpression(code), GenerateCode(code, eq_name)};
+            return CodeInfo{code.mScore[3], code.mScore[2], GetExpression(code), GenerateCode(code, eq_name), code.mCode.GetConstants()};
         }
 
         std::string GetExpression(EvaluatedCode<T> &c) noexcept
