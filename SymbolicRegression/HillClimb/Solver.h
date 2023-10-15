@@ -89,6 +89,7 @@ namespace SymbolicRegression::HillClimb
                 if (it % 10000 == 0)
                 {
                     const auto score = EvalPopulation(data, fp);
+                    // std::cout << GetExpression(mBestCode);
                     if (fp.mVerbose > 1)
                         callback(it, score);
                 }
@@ -298,7 +299,7 @@ namespace SymbolicRegression::HillClimb
         auto Evaluate(const Dataset &data, EvaluatedCode<T> &evc, const std::vector<size_t> &batchSelection, int id, const FitParams &fp) noexcept
         {
             Utils::Result r;
-            auto x = mMachine.ComputeScore(data, evc.mCode, batchSelection, r, mConfig.mTransformation, fp.mMetric, (T)mConfig.mClipMin, (T)mConfig.mClipMax, true);
+            auto x = mMachine.ComputeScore(data, evc.mCode, batchSelection, r, mConfig.mTransformation, fp.mMetric, (T)mConfig.mClipMin, (T)mConfig.mClipMax, (T)fp.mClassWeights[0], (T)fp.mClassWeights[1], true);
             evc.mScore[id] = r.mean();
             return x;
         }
@@ -306,7 +307,7 @@ namespace SymbolicRegression::HillClimb
         auto Evaluate(const Dataset &data, const EvaluatedCode<T> &evc, const FitParams &fp) noexcept
         {
             Utils::Result r;
-            [[maybe_unused]] const auto x = mMachine.ComputeScore(data, evc.mCode, mFullSet, r, mConfig.mTransformation, fp.mMetric, (T)mConfig.mClipMin, (T)mConfig.mClipMax, true);
+            [[maybe_unused]] const auto x = mMachine.ComputeScore(data, evc.mCode, mFullSet, r, mConfig.mTransformation, fp.mMetric, (T)mConfig.mClipMin, (T)mConfig.mClipMax, (T)fp.mClassWeights[0], (T)fp.mClassWeights[1], true);
             return r.mean();
         }
 

@@ -51,5 +51,6 @@ namespace SymbolicRegression
         ConstSettings mConstSettings;
         std::vector<std::pair<Computer::Instructions::InstructionID, double>> mInstrProbs;
         std::vector<std::pair<uint32_t, double>> mFeatProbs;
+        double mClassWeights[2];
     };
 }

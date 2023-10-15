@@ -39,6 +39,8 @@ struct fit_params
     const double *predefined_const_set;
     const char *problem;
     const char *feature_probs;
+    double cw0;
+    double cw1;
 };
 
 struct predict_params

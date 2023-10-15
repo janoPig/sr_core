@@ -153,13 +153,6 @@ SymbolicRegression::Config GetConfig(const solver_params &sp) noexcept
 
 SymbolicRegression::FitParams GetFitParams(const fit_params &fp, uint32_t xcols)
 {
-	std::vector<std::pair<uint32_t, double>> featProbs{xcols};
-	for (uint32_t i = 0; i < featProbs.size(); i++)
-	{
-		featProbs[i].first = i;
-		featProbs[i].second = 1.0;
-	}
-
 	return SymbolicRegression::FitParams{
 		fp.time_limit,
 		fp.verbose,
@@ -168,7 +161,9 @@ SymbolicRegression::FitParams GetFitParams(const fit_params &fp, uint32_t xcols)
 		fp.iter_limit,
 		{fp.const_min, fp.const_max, fp.predefined_const_prob, fp.predefined_const_set ? std::vector<double>{fp.predefined_const_set, fp.predefined_const_set + fp.predefined_const_count} : std::vector<double>{}},
 		GetInstructions(fp.problem, fp.verbose),
-		featProbs};
+		GetFeatProbs(fp.feature_probs, xcols, 0),
+		{fp.cw0, fp.cw1},
+	};
 }
 
 template <typename T>
