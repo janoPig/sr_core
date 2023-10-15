@@ -56,7 +56,7 @@ struct math_model
     double partial_score;
     char *str_representation;
     char *str_code_representation;
-    uint32_t used_constants_count;
+    unsigned long used_constants_count;
     double *used_constants;
 };
 
@@ -68,4 +68,4 @@ extern "C" EXPORT int Predict32(void *hsolver, const float *X, float *y, unsigne
 extern "C" EXPORT int Predict64(void *hsolver, const double *X, double *y, unsigned int rows, unsigned int xcols, const predict_params *params);
 extern "C" EXPORT int GetBestModel(void *hsolver, math_model *model);
 extern "C" EXPORT int GetModel(void *hsolver, unsigned long long id, math_model *model);
-extern "C" EXPORT int FreeModel(math_model *model);
+extern "C" EXPORT void FreeModel(math_model *model);

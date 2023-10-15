@@ -367,7 +367,7 @@ int GetModel(void *hsolver, unsigned long long id, math_model *model)
 	return 0;
 }
 
-int FreeModel(math_model *model)
+void FreeModel(math_model *model)
 {
 	delete[] model->str_representation;
 	delete[] model->str_code_representation;
