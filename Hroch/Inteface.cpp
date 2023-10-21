@@ -332,6 +332,10 @@ void GetModel(const SymbolicRegression::HillClimb::CodeInfo info, math_model *mo
 	if (model->used_constants_count)
 	{
 		model->used_constants = new double[info.mConstants.size()];
+		for (size_t i = 0; i < info.mConstants.size(); i++)
+		{
+			model->used_constants[i] = info.mConstants[i];
+		}
 	}
 }
 

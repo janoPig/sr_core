@@ -288,7 +288,7 @@ namespace SymbolicRegression::Computer
                         }
                     }
                     else if (instr.mSrc[idx] < mInputSize)
-                        return "x[" + std::to_string(instr.mSrc[idx]) + "]";
+                        return "x[:, " + std::to_string(instr.mSrc[idx]) + "]";
                     else
                         return "tmp_" + std::to_string(instr.mSrc[idx] - CodeStart());
                 };
