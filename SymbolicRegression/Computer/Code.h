@@ -127,13 +127,23 @@ namespace SymbolicRegression::Computer
         {
             std::vector<std::string> tmp;
             tmp.resize(mCodeSize);
+            const auto ci = GetConstIndices();
 
             auto parse = [&](size_t idx, bool isConst) -> std::string
             {
                 if (isConst)
-                    return "(" + Utils::ToStringWithPrecision(mConstants[(uint32_t)idx]) + ")";
+                {
+                    if (auto it = ci.find(idx); it != ci.end())
+                    {
+                        return "c" + std::to_string(it->second);
+                    }
+                    else
+                    {
+                        return "error";
+                    }
+                }
                 else if (idx < mInputSize)
-                    return "x" + std::to_string(idx + 1);
+                    return "x" + std::to_string(idx);
                 else
                     return tmp[idx - CodeStart()];
             };
@@ -261,11 +271,7 @@ namespace SymbolicRegression::Computer
 
         auto GenerateCode(const std::vector<CodeGen::InstructionInfo> &set, const std::string &funcName) const noexcept
         {
-            std::unordered_map<uint32_t, uint32_t> m{};
-            uint32_t i = 0;
-            std::transform(mUsedConst.begin(), mUsedConst.end(), std::inserter(m, m.end()),
-                           [&i](const int &s)
-                           { return std::make_pair(s, i++); });
+            const auto ci = GetConstIndices();
             std::string result = "def " + funcName + "(x, c):\n";
             for (size_t i = 0; i < mCodeSize; i++)
             {
@@ -278,7 +284,7 @@ namespace SymbolicRegression::Computer
                 {
                     if (instr.mConst[idx])
                     {
-                        if (auto it = m.find(instr.mSrc[idx]); it != m.end())
+                        if (auto it = ci.find(instr.mSrc[idx]); it != ci.end())
                         {
                             return "c[" + std::to_string(it->second) + "]";
                         }
@@ -410,6 +416,17 @@ namespace SymbolicRegression::Computer
             result += std::string("\treturn ") + "tmp_" + std::to_string(mCodeSize - 1) + "\n";
 
             return result;
+        }
+
+        auto GetConstIndices() const noexcept
+        {
+            std::unordered_map<uint32_t, uint32_t> ci{};
+            uint32_t i = 0;
+            std::transform(mUsedConst.begin(), mUsedConst.end(), std::inserter(ci, ci.end()),
+                           [&i](const int &s)
+                           { return std::make_pair(s, i++); });
+
+            return ci;
         }
 
         uint32_t mInputSize{};
