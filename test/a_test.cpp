@@ -84,7 +84,7 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
     SRSolver solver{cfg};
 
     testStart = high_resolution_clock::now();
-    solver.Fit(data, fp, test_callback);
+    solver.Fit(data, fp, test_callback, nullptr);
 
     // const auto info = solver.GetBestInfo();
     // std::cout << info.mCode;

@@ -19,12 +19,15 @@ namespace Hroch
     using SolverF = HillClimb::Solver<float, BATCH, false>;
     using SolverD = HillClimb::Solver<double, BATCH, false>;
 
+    using SampleWeightF = Utils::BatchVector<float, BATCH>;
+    using SampleWeightD = Utils::BatchVector<double, BATCH>;
+
     class ISolver
     {
     public:
         virtual ~ISolver() = default;
-        virtual void Fit(const DataSetF &, const FitParams &) = 0;
-        virtual void Fit(const DataSetD &, const FitParams &) = 0;
+        virtual void Fit(const DataSetF &, const FitParams &, const SampleWeightF *) = 0;
+        virtual void Fit(const DataSetD &, const FitParams &, const SampleWeightD *) = 0;
         virtual void Predict(DataSetF &, uint32_t, float, float) = 0;
         virtual void Predict(DataSetD &, uint32_t, double, double) = 0;
         virtual void Predict(DataSetF &, uint32_t, uint32_t, float, float) = 0;
@@ -54,20 +57,20 @@ namespace Hroch
     public:
         virtual ~SolverWrapper() = default;
 
-        void Fit(const DataSetF &data, const FitParams &fp) override
+        void Fit(const DataSetF &data, const FitParams &fp, const SampleWeightF *sw) override
         {
 
             if constexpr (DataType == EDataType::F32)
             {
-                SolverType::Fit(data, fp, test_callback);
+                SolverType::Fit(data, fp, test_callback, sw);
             }
         }
 
-        void Fit(const DataSetD &data, const FitParams &fp) override
+        void Fit(const DataSetD &data, const FitParams &fp, const SampleWeightD *sw) override
         {
             if constexpr (DataType == EDataType::F64)
             {
-                SolverType::Fit(data, fp, test_callback);
+                SolverType::Fit(data, fp, test_callback, sw);
             }
         }
 

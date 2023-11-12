@@ -12,7 +12,7 @@ struct SolverHandle
 };
 
 template <typename T>
-void FillDataset(Utils::Dataset<T, BATCH> &data, const T *X, const T *y, unsigned int rows, unsigned int xcols, uint64_t random_state) noexcept
+void FillDataset(Utils::Dataset<T, BATCH> &data, SymbolicRegression::Utils::BatchVector<T, BATCH> *sampleWeight, const T *X, const T *y, const T *sw, unsigned int rows, unsigned int xcols, uint64_t random_state) noexcept
 {
 	auto newSize = (rows / BATCH) * BATCH;
 	if (newSize < rows)
@@ -22,6 +22,10 @@ void FillDataset(Utils::Dataset<T, BATCH> &data, const T *X, const T *y, unsigne
 		std::memcpy(data.DataX(i), &X[i * rows], (size_t)rows * sizeof(T));
 	}
 	std::memcpy(data.DataY(), y, (size_t)rows * sizeof(T));
+	if (sw && sampleWeight)
+	{
+		std::memcpy(sampleWeight->GetData(), sw, (size_t)rows * sizeof(T));
+	}
 
 	// Padding with random rows
 	if (newSize > rows)
@@ -36,6 +40,10 @@ void FillDataset(Utils::Dataset<T, BATCH> &data, const T *X, const T *y, unsigne
 				data.DataX(i)[j] = data.DataX(i)[sampleId];
 			}
 			data.DataY()[j] = data.DataY()[sampleId];
+			if (sw && sampleWeight)
+			{
+				sampleWeight->GetData()[j] = sw[sampleId];
+			}
 		}
 	}
 }
@@ -173,13 +181,16 @@ SymbolicRegression::FitParams GetFitParams(const fit_params &fp, uint32_t xcols)
 }
 
 template <typename T>
-int FitData(SolverHandle &solver, const SymbolicRegression::Utils::Dataset<T, BATCH> &data, const SymbolicRegression::FitParams &fp)
+int FitData(SolverHandle &solver,
+			const SymbolicRegression::Utils::Dataset<T, BATCH> &data,
+			const SymbolicRegression::FitParams &fp,
+			SymbolicRegression::Utils::BatchVector<T, BATCH> *sw)
 {
 	if (fp.mVerbose > 1)
 		printf("run fit task...\n");
 	auto thread_func = [&](size_t idx)
 	{
-		solver.mSolvers[idx]->Fit(data, fp);
+		solver.mSolvers[idx]->Fit(data, fp, sw);
 	};
 
 	std::vector<std::thread> threads;
@@ -199,7 +210,7 @@ int FitData(SolverHandle &solver, const SymbolicRegression::Utils::Dataset<T, BA
 }
 
 template <typename T>
-int FitData(SolverHandle &solver, const T *X, const T *y, uint32_t rows, uint32_t xcols, const fit_params &params)
+int FitData(SolverHandle &solver, const T *X, const T *y, uint32_t rows, uint32_t xcols, const fit_params &params, const T *sw)
 {
 	if (!X || !y || xcols < 1 || xcols != solver.mSolverParams.input_size || rows < 4)
 	{
@@ -213,9 +224,11 @@ int FitData(SolverHandle &solver, const T *X, const T *y, uint32_t rows, uint32_
 	auto fp = GetFitParams(params, xcols);
 	const auto cs = SymbolicRegression::CodeSettings{solver.mSolverParams.input_size, solver.mSolverParams.const_size, solver.mSolverParams.min_code_size, solver.mSolverParams.max_code_size};
 	SymbolicRegression::Utils::Dataset<T, BATCH> data{(size_t)rows, cs};
-	FillDataset(data, X, y, rows, xcols, solver.mSolverParams.random_state);
 
-	return FitData(solver, data, fp);
+	SymbolicRegression::Utils::BatchVector<T, BATCH> sampleWeight{(size_t)rows};
+	FillDataset(data, &sampleWeight, X, y, sw, rows, xcols, solver.mSolverParams.random_state);
+
+	return FitData(solver, data, fp, sw ? &sampleWeight : nullptr);
 }
 
 template <typename T>
@@ -245,7 +258,7 @@ int Predict(SolverHandle &solver, const T *X, T *y, unsigned int rows, unsigned 
 
 	const auto cs = SymbolicRegression::CodeSettings{solver.mSolverParams.input_size, solver.mSolverParams.const_size, solver.mSolverParams.min_code_size, solver.mSolverParams.max_code_size};
 	SymbolicRegression::Utils::Dataset<T, BATCH> data{(size_t)rows, cs};
-	FillDataset(data, X, y, rows, xcols, solver.mSolverParams.random_state);
+	FillDataset(data, static_cast<SymbolicRegression::Utils::BatchVector<T, BATCH> *>(nullptr), X, y, static_cast<const T *>(nullptr), rows, xcols, solver.mSolverParams.random_state);
 
 	if (params->id != (uint32_t)-1)
 		ps->Predict(data, solver.mSolverParams.transformation, params->id % solver.mSolverParams.pop_size, (T)solver.mSolverParams.clip_min, (T)solver.mSolverParams.clip_max);
@@ -277,22 +290,22 @@ void DeleteSolver(void *hsolver)
 	delete (SolverHandle *)hsolver;
 }
 
-int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params)
+int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params, const float *sw, unsigned int sw_len)
 {
 	SolverHandle *solver = (SolverHandle *)hsolver;
 	if (solver->mSolverParams.precision != 1)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len == rows ? sw : nullptr);
 }
 
-int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params)
+int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw, unsigned int sw_len)
 {
 	SolverHandle *solver = (SolverHandle *)hsolver;
 	if (solver->mSolverParams.precision != 2)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len == rows ? sw : nullptr);
 }
 
 int Predict32(void *hsolver, const float *X, float *y, unsigned int rows, unsigned int xcols, [[maybe_unused]] const predict_params *params)
