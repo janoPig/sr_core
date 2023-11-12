@@ -62,8 +62,8 @@ struct math_model
 
 extern "C" EXPORT void *CreateSolver(const solver_params *params);
 extern "C" EXPORT void DeleteSolver(void *hsolver);
-extern "C" EXPORT int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params, const float *sw);
-extern "C" EXPORT int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw);
+extern "C" EXPORT int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params, const float *sw, unsigned int sw_len);
+extern "C" EXPORT int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw, unsigned int sw_len);
 extern "C" EXPORT int Predict32(void *hsolver, const float *X, float *y, unsigned int rows, unsigned int xcols, const predict_params *params);
 extern "C" EXPORT int Predict64(void *hsolver, const double *X, double *y, unsigned int rows, unsigned int xcols, const predict_params *params);
 extern "C" EXPORT int GetBestModel(void *hsolver, math_model *model);

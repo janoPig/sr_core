@@ -290,22 +290,22 @@ void DeleteSolver(void *hsolver)
 	delete (SolverHandle *)hsolver;
 }
 
-int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params, const float *sw)
+int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, unsigned int xcols, const fit_params *params, const float *sw, unsigned int sw_len)
 {
 	SolverHandle *solver = (SolverHandle *)hsolver;
 	if (solver->mSolverParams.precision != 1)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params, sw);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len != rows ? sw : nullptr);
 }
 
-int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw)
+int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw, unsigned int sw_len)
 {
 	SolverHandle *solver = (SolverHandle *)hsolver;
 	if (solver->mSolverParams.precision != 2)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params, sw);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len != rows ? sw : nullptr);
 }
 
 int Predict32(void *hsolver, const float *X, float *y, unsigned int rows, unsigned int xcols, [[maybe_unused]] const predict_params *params)
