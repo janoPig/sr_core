@@ -42,12 +42,12 @@ namespace SymbolicRegression::Computer
 			T *__restrict yPred = mMemory[code.Size() - 1];
 			const auto clip = clipMin < clipMax;
 			const auto cw = cw0 != cw1;
-			const T *__restrict sw = nullptr;
-			if (sampleWeight)
-				sw = sampleWeight->GetData();
 
 			for (const auto batchIdx : batchSelection)
 			{
+				const T *__restrict yTrue = data.BatchY(batchIdx);
+				const T *__restrict sw = sampleWeight ? sampleWeight->GetBatch(batchIdx) : nullptr;
+
 				mProcessor.Execute(code, data, mMemory, batchIdx, filter);
 
 				if (transformation)
@@ -66,43 +66,43 @@ namespace SymbolicRegression::Computer
 				if (metric == 0)
 				{
 					if (sw)
-						score = Utils::ComputeSqErr<T, true>(data.BatchY(batchIdx), yPred, BATCH, sw);
+						score = Utils::ComputeSqErr<T, true>(yTrue, yPred, BATCH, sw);
 					else
-						score = Utils::ComputeSqErr<T, false>(data.BatchY(batchIdx), yPred, BATCH);
+						score = Utils::ComputeSqErr<T, false>(yTrue, yPred, BATCH);
 				}
 				else if (metric == 1)
 				{
 					if (sw)
-						score = Utils::ComputeMAE<T, true>(data.BatchY(batchIdx), yPred, BATCH, sw);
+						score = Utils::ComputeMAE<T, true>(yTrue, yPred, BATCH, sw);
 					else
-						score = Utils::ComputeMAE<T, false>(data.BatchY(batchIdx), yPred, BATCH);
+						score = Utils::ComputeMAE<T, false>(yTrue, yPred, BATCH);
 				}
 				else if (metric == 2)
 				{
 					if (sw)
-						score = Utils::ComputeMSLE<T, true>(data.BatchY(batchIdx), yPred, BATCH, sw);
+						score = Utils::ComputeMSLE<T, true>(yTrue, yPred, BATCH, sw);
 					else
-						score = Utils::ComputeMSLE<T, false>(data.BatchY(batchIdx), yPred, BATCH);
+						score = Utils::ComputeMSLE<T, false>(yTrue, yPred, BATCH);
 				}
 				else if (metric == 3)
 				{
-					score = 1.0 - std::abs(Utils::ComputePseudoKendall(data.BatchY(batchIdx), yPred, BATCH));
+					score = 1.0 - std::abs(Utils::ComputePseudoKendall(yTrue, yPred, BATCH));
 				}
 				else if (metric == 4)
 				{
 					if (cw)
 					{
 						if (sw)
-							score = Utils::ComputeLogLoss<T, true, true>(data.BatchY(batchIdx), yPred, BATCH, cw0, cw1, sw);
+							score = Utils::ComputeLogLoss<T, true, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
 						else
-							score = Utils::ComputeLogLoss<T, true, false>(data.BatchY(batchIdx), yPred, BATCH, cw0, cw1);
+							score = Utils::ComputeLogLoss<T, true, false>(yTrue, yPred, BATCH, cw0, cw1);
 					}
 					else
 					{
 						if (sw)
-							score = Utils::ComputeLogLoss<T, false, true>(data.BatchY(batchIdx), yPred, BATCH, cw0, cw1, sw);
+							score = Utils::ComputeLogLoss<T, false, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
 						else
-							score = Utils::ComputeLogLoss<T, false, false>(data.BatchY(batchIdx), yPred, BATCH);
+							score = Utils::ComputeLogLoss<T, false, false>(yTrue, yPred, BATCH);
 					}
 				}
 

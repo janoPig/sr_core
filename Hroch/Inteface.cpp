@@ -42,7 +42,7 @@ void FillDataset(Utils::Dataset<T, BATCH> &data, SymbolicRegression::Utils::Batc
 			data.DataY()[j] = data.DataY()[sampleId];
 			if (sw && sampleWeight)
 			{
-				sampleWeight->GetData()[j] = data.DataY()[sampleId];
+				sampleWeight->GetData()[j] = sw[sampleId];
 			}
 		}
 	}
@@ -296,7 +296,7 @@ int FitData32(void *hsolver, const float *X, const float *y, unsigned int rows, 
 	if (solver->mSolverParams.precision != 1)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params, sw_len != rows ? sw : nullptr);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len == rows ? sw : nullptr);
 }
 
 int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows, unsigned int xcols, const fit_params *params, const double *sw, unsigned int sw_len)
@@ -305,7 +305,7 @@ int FitData64(void *hsolver, const double *X, const double *y, unsigned int rows
 	if (solver->mSolverParams.precision != 2)
 		return 1;
 
-	return FitData(*solver, X, y, rows, xcols, *params, sw_len != rows ? sw : nullptr);
+	return FitData(*solver, X, y, rows, xcols, *params, sw_len == rows ? sw : nullptr);
 }
 
 int Predict32(void *hsolver, const float *X, float *y, unsigned int rows, unsigned int xcols, [[maybe_unused]] const predict_params *params)

@@ -145,7 +145,7 @@ namespace SymbolicRegression::Utils
                 auto _err = -std::log(yPred[n]);
                 if constexpr (CW)
                 {
-                    err *= cw1;
+                    _err *= cw1;
                 }
                 if constexpr (SW)
                 {
