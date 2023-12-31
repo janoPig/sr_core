@@ -8,8 +8,9 @@ namespace SymbolicRegression::HillClimb
     template <typename T>
     T mutate_const_4(Utils::RandomEngine &random, T val, T clipMin, T clipMax, T factor = static_cast<T>(1.0)) noexcept
     {
-        constexpr auto epsilon = 0.000001;
-        auto delta = random.Rand(static_cast<T>(0.0), static_cast<T>(1.0 - epsilon));
+        constexpr auto epsilon = static_cast<T>(0.000001);
+        // volatile: msvc incorrectly optimize this
+        volatile auto delta = random.Rand(static_cast<T>(0.0), static_cast<T>(1.0 - epsilon));
         delta = delta * delta * delta * delta * factor;
         delta += static_cast<T>(epsilon);
         if (random.Rand())
