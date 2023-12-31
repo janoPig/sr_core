@@ -23,7 +23,7 @@ namespace SymbolicRegression::Computer
               mCodeSize(0),
               mConstants(cs.mConstSize),
               mCodeInstructions(cs.mMaxCodeSize),
-              mUsedInstructionsCount(0),
+              mTreeComplexity(0),
               mUsedInstructions(0),
               mUsedConst(cs.mConstSize)
         {
@@ -102,7 +102,7 @@ namespace SymbolicRegression::Computer
                 i.mUsed = false;
 
             first.mUsed = true;
-            mUsedInstructionsCount = 1;
+            mTreeComplexity = 1;
             mUsedInstructions.push_back(mCodeSize - 1);
 
             while (ic)
@@ -112,9 +112,9 @@ namespace SymbolicRegression::Computer
                 if (!instr.mUsed)
                 {
                     mUsedInstructions.push_back(i - codeStart);
-                    mUsedInstructionsCount++;
                     instr.mUsed = true;
                 }
+                mTreeComplexity++;
 
                 process_instr(instr, 0);
                 if (set[static_cast<uint32_t>(instr.mOpCode)].op > 1)
@@ -434,7 +434,7 @@ namespace SymbolicRegression::Computer
         std::vector<T> mConstants{};
         std::vector<Instruction> mCodeInstructions{};
 
-        size_t mUsedInstructionsCount{};
+        size_t mTreeComplexity{};
         std::vector<uint32_t> mUsedInstructions{};
         std::vector<uint32_t> mUsedConst{};
     };
