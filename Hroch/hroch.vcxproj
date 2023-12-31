@@ -275,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\csv\CsvFile.h" />
+    <ClInclude Include="..\Libs\robin_hood.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Code.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Instructions\AdvancedMath.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Instructions\BasicMath.h" />
