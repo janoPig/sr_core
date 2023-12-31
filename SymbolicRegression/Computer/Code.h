@@ -129,7 +129,7 @@ namespace SymbolicRegression::Computer
             tmp.resize(mCodeSize);
             const auto ci = GetConstIndices();
 
-            auto parse = [&](size_t idx, bool isConst) -> std::string
+            auto parse = [&](uint32_t idx, bool isConst) -> std::string
             {
                 if (isConst)
                 {
@@ -269,7 +269,7 @@ namespace SymbolicRegression::Computer
             return std::vector<double>{};
         }
 
-        auto GenerateCode(const std::vector<CodeGen::InstructionInfo> &set, const std::string &funcName) const noexcept
+        auto GenerateCode(const std::vector<CodeGen::InstructionInfo> &set, const std::string &funcName) const
         {
             const auto ci = GetConstIndices();
             std::string result = "def " + funcName + "(x, c):\n";
