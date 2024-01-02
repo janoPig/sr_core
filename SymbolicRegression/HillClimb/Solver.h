@@ -69,6 +69,7 @@ namespace SymbolicRegression::HillClimb
             indices.reserve((size_t)mConfig.mCodeSettings.mMaxCodeSize * 2);
 
             EvaluatedCode<T> neighbour(mConfig.mCodeSettings);
+            std::vector<size_t> sel0(1);
 
             size_t it{};
             while (true)
@@ -93,7 +94,7 @@ namespace SymbolicRegression::HillClimb
                 if (it % 10000 == 0)
                 {
                     const auto score = EvalPopulation(data, fp, sampleWeight);
-                    // std::cout << GetExpression(mBestCode);
+                    //std::cout << mBestCode.mCode.mUsedInstructions.size() << " " << GetExpression(mBestCode) << std::endl;
                     if (fp.mVerbose > 1)
                         callback(it, score);
                 }
@@ -103,6 +104,8 @@ namespace SymbolicRegression::HillClimb
                 auto bestCode = hillclimber->Current();
                 auto bestScore = LARGE_FLOAT;
                 bool find = false;
+                std::pair<size_t, double> worstBatch;
+                sel0[0] = hillclimber->mWorstBatch.first;
 
                 for (int subStep = 0; subStep < 15; subStep++)
                 {
@@ -117,22 +120,20 @@ namespace SymbolicRegression::HillClimb
                         if (neighbour.mCode.IsConstExpression(indices.data(), mCodeMapping.set))
                             continue;
 
-                        Evaluate(data, neighbour, std::vector<size_t>{{hillclimber->mWorstBatch.first}}, 0, fp, sampleWeight);
+                        Evaluate(data, neighbour, sel0, 0, fp, sampleWeight);
 
-                        if (neighbour.mScore[0] >= 1.1 * hillclimber->Current().mScore[0])
+                        if (neighbour.mScore[0] >= 1.15 * hillclimber->Current().mScore[0])
                         {
                             continue;
                         }
 
-                        if (data.BatchCount() > 1)
-                            Evaluate(data, neighbour, hillclimber->mSmallSet, 1, fp, sampleWeight);
-                        else
-                            neighbour.mScore[1] = neighbour.mScore[0];
+                        auto tmp = Evaluate(data, neighbour, hillclimber->mSample, 1, fp, sampleWeight);
 
                         if (neighbour.mScore[1] < bestScore)
                         {
                             bestCode = neighbour;
                             bestScore = neighbour.mScore[1];
+                            worstBatch = tmp;
                             find = true;
                         }
                     }
@@ -142,15 +143,14 @@ namespace SymbolicRegression::HillClimb
                 {
                     if (bestCode.mScore[1] < hillclimber->Best().mScore[1] * 1.15)
                     {
-                        const auto worstBatch = Evaluate(data, bestCode, hillclimber->mBigSet, 2, fp, sampleWeight);
-                        if (bestCode.mScore[2] < hillclimber->Best().mScore[2])
+                        hillclimber->Current() = bestCode;
+                        if (bestCode.mScore[1] < hillclimber->Best().mScore[1])
                         {
                             bestCode.mScore[0] = worstBatch.second;
                             hillclimber->Best() = bestCode;
                             hillclimber->mWorstBatch = worstBatch;
                         }
                     }
-                    hillclimber->Current() = bestCode;
                 }
             }
             return EvalPopulation(data, fp, sampleWeight);
@@ -177,29 +177,29 @@ namespace SymbolicRegression::HillClimb
                               const Utils::BatchVector<T, BATCH> *sampleWeight,
                               double alpha = 0.05) noexcept
         {
-            auto bestScore = mBestCode.mScore[3];
+            auto bestScore = mBestCode.mScore[2];
             for (auto &hc : mPopulation)
             {
-                if (hc.Best().mScore[2] > (1.0 + alpha) * bestScore)
+                if (hc.Best().mScore[1] > (1.0 + alpha) * bestScore)
                     continue;
-                hc.Best().mScore[3] = Evaluate(data, hc.Best(), fp, sampleWeight);
-                if (hc.Best().mScore[3] < bestScore)
+                hc.Best().mScore[2] = Evaluate(data, hc.Best(), fp, sampleWeight);
+                if (hc.Best().mScore[2] < bestScore)
                 {
-                    bestScore = hc.Best().mScore[3];
+                    bestScore = hc.Best().mScore[2];
                     mBestCode = hc.Best();
                 }
             }
-            return mBestCode.mScore[3];
+            return mBestCode.mScore[2];
         }
 
         double Score() const noexcept
         {
-            return mBestCode.mScore[3];
+            return mBestCode.mScore[2];
         }
 
         CodeInfo GetBestInfo() noexcept
         {
-            return CodeInfo{mBestCode.mScore[3], mBestCode.mScore[2], GetExpression(mBestCode), GenerateCode(mBestCode, "equation"), mBestCode.mCode.GetConstants()};
+            return CodeInfo{mBestCode.mScore[2], mBestCode.mScore[1], GetExpression(mBestCode), GenerateCode(mBestCode, "equation"), mBestCode.mCode.GetConstants()};
         }
 
         CodeInfo GetInfo(size_t threadIdx, size_t idx) noexcept
@@ -242,8 +242,7 @@ namespace SymbolicRegression::HillClimb
             assert(!mInitialized);
 
             const CodeInitializer<T> codeInit{mConfig.mCodeSettings, mConfig.mInitConstSettings, fp.mInstrProbs, fp.mFeatProbs, mRandom};
-            auto smallSize = std::min((size_t)8, data.BatchCount());
-            auto bigSize = std::min((size_t)64, data.BatchCount());
+            auto sampleSize = std::min((size_t)16, data.BatchCount());
 
             mFullSet.resize(data.BatchCount());
             std::iota(mFullSet.begin(), mFullSet.end(), 0);
@@ -256,17 +255,8 @@ namespace SymbolicRegression::HillClimb
 
             for (auto &hc : mPopulation)
             {
-                hc.mSmallSet.resize(smallSize);
-                for (auto &batch : hc.mSmallSet)
-                {
-                    batch = mRandom.Rand(data.BatchCount());
-                }
-
-                hc.mBigSet.resize(bigSize);
-                for (auto &batch : hc.mBigSet)
-                {
-                    batch = mRandom.Rand(data.BatchCount());
-                }
+                hc.mSample.resize(sampleSize);
+                std::iota(hc.mSample.begin(), hc.mSample.end(), 0);
 
                 EvaluatedCode<T> candidate{mConfig.mCodeSettings};
 
@@ -279,7 +269,7 @@ namespace SymbolicRegression::HillClimb
 
                     if (!candidate.mCode.IsConstExpression(indices.data(), mCodeMapping.set))
                     {
-                        Evaluate(data, candidate, bs, 1, fp, sampleWeight);
+                        Evaluate(data, candidate, bs, 0, fp, sampleWeight);
 
                         if (cnt == 3 || candidate.mScore[0] < bestScore)
                         {
@@ -290,11 +280,10 @@ namespace SymbolicRegression::HillClimb
                     }
                     k--;
                 }
-                Evaluate(data, hc.Current(), hc.mSmallSet, 1, fp, sampleWeight);
-                hc.mWorstBatch = Evaluate(data, hc.Current(), hc.mBigSet, 2, fp, sampleWeight);
+                hc.mWorstBatch = Evaluate(data, hc.Current(), hc.mSample, 1, fp, sampleWeight);
                 hc.Best() = hc.Current();
 
-                if (hc.Best().mScore[2] < mBestCode.mScore[2])
+                if (hc.Best().mScore[1] < mBestCode.mScore[1])
                 {
                     mBestCode = hc.Current();
                 }
