@@ -8,7 +8,7 @@
 - $const\\_size$ Maximum alloved constants in symbolic model.
 - $predefined\\_const\\_prob$ Probability of selecting one of the predefined constants during equations search.
 - $predefined\\_const\\_set$ Predefined constants used during equations search.
-- $problem$ Set of mathematical functions used in searched equations. Each mathematical function can have a defined weight with which it will be selected in the mutation process. By default, common mathematical operations such as multiplication and addition have a higher weight than goniometric functions or $pow$ and $\exp$. This is an easy way to eliminate $\sin\left(\sin\left(\exp(x)\right)\right)$-type equations, which may have high precision and low complexity, but are usually inappropriate and difficult to interpret.
+- $problem$ Set of mathematical functions used in searched equations. Each mathematical function can have a defined weight with which it will be selected in the mutation process. By default, common mathematical operations such as multiplication and addition have a higher weight than goniometric functions or $pow$ and $\exp$. This is a natural way to eliminate $\sin\left(\sin\left(\exp(x)\right)\right)$-type equations, which may have high precision and low complexity, but are usually inappropriate and difficult to interpret.
 - $feature\\_probs$ The probability that a mutation process will select a feature. This parameter allows using feature importances provided by a black-box regressor as an input parameter for symbolic regression to speed up the search by selecting mainly the important features.
 - $metric$ Metric used to verify goodness of solutions in the search process. Choose from MSE, MAE, MSLE, LogLoss.
 - $transformation$ Final transformation for computed value. Choose from logistic function for a classification tasks, no transformation for a regression problems, and ordinal(rounding) for a ordinal regression.
@@ -23,13 +23,13 @@
 ***Fitness function*** Can be controlled by $metric$ parameter. To verify goodness of solutions for a classification task in the search process is by default used $Logloss$ function combined with a $logistic$ transformation.
 
 $$
-\texttt{Logloss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ]*w_i*c[y_i]
+\texttt{Logloss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ] \cdot w_i \cdot c[y_i]
 $$
 
 For a regression task is used a $\texttt{MSE}$ function.
 
 $$
-\texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2*w_i
+\texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2 \cdot w_i
 $$
 
 where:
