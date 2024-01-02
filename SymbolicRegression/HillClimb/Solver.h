@@ -256,7 +256,18 @@ namespace SymbolicRegression::HillClimb
             for (auto &hc : mPopulation)
             {
                 hc.mSample.resize(sampleSize);
-                std::iota(hc.mSample.begin(), hc.mSample.end(), 0);
+                if (sampleSize == data.BatchCount())
+                {
+                    std::iota(hc.mSample.begin(), hc.mSample.end(), 0);
+                }
+                else
+                {
+                    mRandom.Shuffle(allSamples.begin(), allSamples.end());
+                    for (size_t i = 0; i < hc.mSample.size(); i++)
+                    {
+                        hc.mSample[i] = allSamples[i];
+                    }
+                }
 
                 EvCode candidate{mConfig.mCodeSettings};
 
