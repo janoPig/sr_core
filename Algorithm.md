@@ -23,13 +23,13 @@
 ***Fitness function*** Can be controlled by $metric$ parameter. To verify goodness of solutions for a classification task in the search process is by default used $Logloss$ function combined with a $logistic$ transformation.
 
 $$
-\texttt{Logloss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ]
+\texttt{Logloss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ]*w_i*c[y_i]
 $$
 
 For a regression task is used a $\texttt{MSE}$ function.
 
 $$
-\texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2
+\texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2*w_i
 $$
 
 where:
@@ -38,6 +38,8 @@ where:
 - $y_i$: Ground truth (true value) for the i-th example
 - $\hat{y}_i$: Predicted value for the i-th example
 - $p_i$: Predicted probability of the positive class for the i-th example
+- $w_i$: Sample weight
+- $c[y_i]$: Class weight for a given class $y_i$
 
 ***Tournament selection*** Among the current population of solutions (models), the $pop_{sel}$ of them are selected randomly and one with the best fitness score has been returned afterwards.
 
