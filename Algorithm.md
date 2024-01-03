@@ -88,7 +88,7 @@ If a $predefined_{const set}$ parameter is given then mutation will with $predef
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $individual.D_{tr}^{'} \leftarrow Sample(D_{tr}, sample_{size})$
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $individual.score^{'}, individual.D_{tr}^{''} \leftarrow Evaluate(neighbour, neighbour.D_{tr}^{'})$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $individual.score^{'}, individual.D_{tr}^{''} \leftarrow Evaluate(neighbour, neighbour.D_{tr}^{'})$ // $individual.D_{tr}^{''}$ is a small portion of the data (the batch with size 64 rows) from sample $D_{tr}^{'}$ with the worst score.
 
 &nbsp;&nbsp;&nbsp;&nbsp; **while** stoping criteria is not met **do**
 
@@ -120,7 +120,13 @@ If a $predefined_{const set}$ parameter is given then mutation will with $predef
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $individual.bestSolution \leftarrow bestNeighbour$
 
-&nbsp;&nbsp;&nbsp;&nbsp; $bs \leftarrow SelectBest(population, D_{tr})$
+&nbsp;&nbsp;&nbsp;&nbsp; **for** $individual \in population$ **do**
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $individual.score \leftarrow Evaluate(individual, D_{tr})$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **if** $individual.score \lt bs.score$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $bs \leftarrow individual$
 
 &nbsp;&nbsp;&nbsp;&nbsp; **return** $bs$
 
