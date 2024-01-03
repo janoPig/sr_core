@@ -94,7 +94,7 @@ namespace SymbolicRegression::HillClimb
                 if (it % 10000 == 0)
                 {
                     const auto score = EvalPopulation(data, fp, sampleWeight);
-                    //std::cout << mBestCode.mCode.mUsedInstructions.size() << " " << GetExpression(mBestCode) << std::endl;
+                    // std::cout << mBestCode.mCode.mUsedInstructions.size() << " " << GetExpression(mBestCode) << std::endl;
                     if (fp.mVerbose > 1)
                         callback(it, score);
                 }
@@ -206,7 +206,7 @@ namespace SymbolicRegression::HillClimb
         {
             auto &code = mPopulation[idx].Best();
             const std::string eq_name = "equation_" + std::to_string(threadIdx) + "_" + std::to_string(idx);
-            return CodeInfo{code.mScore[3], code.mScore[2], GetExpression(code), GenerateCode(code, eq_name), code.mCode.GetConstants()};
+            return CodeInfo{code.mScore[2], code.mScore[1], GetExpression(code), GenerateCode(code, eq_name), code.mCode.GetConstants()};
         }
 
         std::string GetExpression(EvaluatedCode<T> &c) noexcept
