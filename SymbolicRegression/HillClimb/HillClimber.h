@@ -34,8 +34,7 @@ namespace SymbolicRegression::HillClimb
 		EvaluatedCode<T> mBest{};
 
 	public:
-		std::vector<size_t> mSmallSet;
-		std::vector<size_t> mBigSet;
+		std::vector<size_t> mSample;
 		std::pair<size_t, double> mWorstBatch;
 	};
 }

@@ -94,6 +94,7 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
 
 int main(int /*argc*/, char * /*argv*/[])
 {
+    //run_test("../test/344_mv.tsv" /*, 10000*/);
     run_test("../test/586_fri_c3_1000_25.tsd" /*, 10000*/);
 
     return 0;

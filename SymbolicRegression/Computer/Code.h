@@ -325,7 +325,7 @@ namespace SymbolicRegression::Computer
                     HANDLE_SYMBOL(Instructions::InstructionID::minv, "1.0/");
                     HANDLE_SYMBOL(Instructions::InstructionID::sq2, "numpy.square");
                 case Instructions::InstructionID::pdiv:
-                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(0.00000001 + numpy.square(" + parse(1) + ")) # PDIV\n";
+                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(0.00000001 + numpy.square(" + parse(1) + "))) # PDIV\n";
                     break;
                     HANDLE_SYMBOL(Instructions::InstructionID::max, "numpy.maximum");
                     HANDLE_SYMBOL(Instructions::InstructionID::min, "numpy.minimum");
@@ -342,7 +342,7 @@ namespace SymbolicRegression::Computer
                     HANDLE_SYMBOL(Instructions::InstructionID::sqrt, "numpy.sqrt");
                     HANDLE_SYMBOL(Instructions::InstructionID::cbrt, "numpy.cbrt");
                 case Instructions::InstructionID::aq:
-                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(1.0 + numpy.square(" + parse(1) + ")) # AQ\n";
+                    result += "\ttmp_" + std::to_string(i) + " = " + parse(0) + " / (numpy.sqrt(1.0 + numpy.square(" + parse(1) + "))) # AQ\n";
                     break;
                     HANDLE_SYMBOL(Instructions::InstructionID::sin, "numpy.sin");
                     HANDLE_SYMBOL(Instructions::InstructionID::cos, "numpy.cos");
