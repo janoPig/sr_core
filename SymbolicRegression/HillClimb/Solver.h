@@ -280,7 +280,9 @@ namespace SymbolicRegression::HillClimb
                     }
                     k--;
                 }
-                hc.mWorstBatch = Evaluate(data, hc.Current(), hc.mSample, 1, fp, sampleWeight);
+                auto &current = hc.Current();
+                hc.mWorstBatch = Evaluate(data, current, hc.mSample, 1, fp, sampleWeight);
+                current.mScore[0] = hc.mWorstBatch.second;
                 hc.Best() = hc.Current();
 
                 if (hc.Best().mScore[1] < mBestCode.mScore[1])
