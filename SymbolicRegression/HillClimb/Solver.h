@@ -246,6 +246,7 @@ namespace SymbolicRegression::HillClimb
 
             mFullSet.resize(data.BatchCount());
             std::iota(mFullSet.begin(), mFullSet.end(), 0);
+            auto allSamples = mFullSet;
 
             std::vector<uint32_t> indices;
             indices.reserve((size_t)mConfig.mCodeSettings.mMaxCodeSize * 2);
