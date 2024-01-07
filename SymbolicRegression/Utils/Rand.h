@@ -1,4 +1,5 @@
 #pragma once
+#include "Hash.h"
 
 namespace SymbolicRegression::Utils
 {
@@ -19,9 +20,7 @@ namespace SymbolicRegression::Utils
 
         uint64_t RandU64() noexcept
         {
-            mState ^= mState << 13;
-            mState ^= mState >> 7;
-            mState ^= mState << 17;
+            mState = Mix64(mState);
             return mState;
         }
 
