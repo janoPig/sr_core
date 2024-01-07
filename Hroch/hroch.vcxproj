@@ -63,7 +63,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
@@ -275,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\csv\CsvFile.h" />
+    <ClInclude Include="..\Libs\robin_hood.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Code.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Instructions\AdvancedMath.h" />
     <ClInclude Include="..\SymbolicRegression\Computer\Instructions\BasicMath.h" />
@@ -297,6 +298,7 @@
     <ClInclude Include="..\SymbolicRegression\Utils\BatchVector.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Dataset.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Evaluate.h" />
+    <ClInclude Include="..\SymbolicRegression\Utils\Hash.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Rand.h" />
     <ClInclude Include="..\SymbolicRegression\Utils\Utils.h" />
     <ClInclude Include="Inteface.h" />

@@ -1,4 +1,5 @@
 #pragma once
+#include "Hash.h"
 
 namespace SymbolicRegression::Utils
 {
@@ -19,9 +20,7 @@ namespace SymbolicRegression::Utils
 
         uint64_t RandU64() noexcept
         {
-            mState ^= mState << 13;
-            mState ^= mState >> 7;
-            mState ^= mState << 17;
+            mState = Mix64(mState);
             return mState;
         }
 
@@ -65,6 +64,18 @@ namespace SymbolicRegression::Utils
         auto RandomElement(const V &vec) noexcept
         {
             return vec[Rand(vec.size())];
+        }
+
+        template <class RandomIt>
+        void Shuffle(RandomIt first, RandomIt last)
+        {
+            typedef typename std::iterator_traits<RandomIt>::difference_type diff_t;
+
+            for (diff_t i = last - first - 1; i > 0; --i)
+            {
+                using std::swap;
+                std::swap(first[i], first[Rand((uint32_t)(i + 1))]);
+            }
         }
     };
 

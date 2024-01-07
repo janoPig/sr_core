@@ -12,7 +12,7 @@ namespace SymbolicRegression::HillClimb
         // volatile: msvc incorrectly optimize this
         volatile auto delta = random.Rand(static_cast<T>(0.0), static_cast<T>(1.0 - epsilon));
         delta = delta * delta * delta * delta * factor;
-        delta += static_cast<T>(epsilon);
+        delta = delta + static_cast<T>(epsilon);
         if (random.Rand())
             val *= static_cast<T>(1.0) + delta;
         else

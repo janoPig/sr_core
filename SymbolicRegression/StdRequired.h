@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 #include <cmath>
+#include <cstring>
 #include <cassert>
 #include <numeric>
 #include <queue>

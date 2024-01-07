@@ -25,12 +25,12 @@ namespace SymbolicRegression::Computer
 
         ~Memory() = default;
 
-        const auto &operator[](const size_t n) const noexcept
+        ALWAYS_INLINE const auto &operator[](const size_t n) const noexcept
         {
             return mMem[n];
         }
 
-        auto &operator[](const size_t n) noexcept
+        ALWAYS_INLINE auto &operator[](const size_t n) noexcept
         {
             return mMem[n];
         }

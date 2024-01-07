@@ -14,3 +14,10 @@ inline constexpr double LARGE_FLOAT = 1.0e30;
 #define LOG(message,...)
 #endif
 
+#if defined(_MSC_VER)
+#define ALWAYS_INLINE __forceinline
+#elif __has_attribute(always_inline) || defined(__GNUC__)
+#define ALWAYS_INLINE __attribute__((__always_inline__)) inline
+#else
+#define ALWAYS_INLINE inline
+#endif
