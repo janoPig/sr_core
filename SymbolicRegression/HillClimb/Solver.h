@@ -325,9 +325,9 @@ namespace SymbolicRegression::HillClimb
             {
                 const auto idx = mRandom.Rand(mPopulation.size());
                 const auto &tmp = mPopulation[idx];
-                if (tmp.Best().mScore[2] < bestFit)
+                if (tmp.Best().mScore[1] < bestFit)
                 {
-                    bestFit = tmp.Best().mScore[2];
+                    bestFit = tmp.Best().mScore[1];
                     bestIdx = idx;
                 }
             }
