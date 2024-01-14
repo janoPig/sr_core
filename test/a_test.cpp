@@ -48,6 +48,9 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
         .mVerbose = 2,
         .mTournament = 4,
         .mMetric = 0, // MSE
+        .mNeighboursCount = 15,
+        .mAlpha = 0.15,
+        .mBeta = 0.5,
         .mIterLimit = iter_count,
         .mConstSettings = {.mMin = -1e30, .mMax = 1e30, .mPredefinedProb = 0.001, .mPredefinedSet = {0.0, 1.0, -1.0, 3.141592654}},
         .mInstrProbs = Srl::Computer::Instructions::AdvancedMath,
@@ -94,7 +97,7 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
 
 int main(int /*argc*/, char * /*argv*/[])
 {
-    //run_test("../test/344_mv.tsv" /*, 10000*/);
+    // run_test("../test/344_mv.tsv" /*, 10000*/);
     run_test("../test/586_fri_c3_1000_25.tsd" /*, 10000*/);
 
     return 0;
