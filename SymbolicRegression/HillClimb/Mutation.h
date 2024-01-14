@@ -58,7 +58,7 @@ namespace SymbolicRegression::HillClimb
             auto &instr = code.mCodeInstructions[instrPos];
 
             // mute vals
-            if (instrPos == 0 || mRandom.Prob(mBeta))
+            if (instrPos == 0 || mRandom.Prob(1.0 - mBeta))
             {
                 if (constCount == 0 || mRandom.TestProb(768))
                 {
