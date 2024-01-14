@@ -34,6 +34,11 @@ namespace SymbolicRegression::Utils
             return (RandU64() & X) < prob;
         }
 
+        bool Prob(const double prob) noexcept
+        {
+            return Rand(1.0) < prob;
+        }
+
         uint64_t Rand(const uint64_t range) noexcept
         {
             return RandU64() % range;

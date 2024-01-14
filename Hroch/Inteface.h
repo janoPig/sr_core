@@ -31,6 +31,9 @@ struct fit_params
     unsigned int verbose;
     unsigned int pop_sel;
     unsigned int metric;
+    unsigned int neighbours_count;
+    double alpha;
+    double beta;
     unsigned long long iter_limit;
     double const_min;
     double const_max;

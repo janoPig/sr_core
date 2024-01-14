@@ -47,6 +47,9 @@ namespace SymbolicRegression
         uint32_t mVerbose;
         uint32_t mTournament;
         uint32_t mMetric;
+        uint32_t mNeighboursCount;
+        double mAlpha;
+        double mBeta;
         uint64_t mIterLimit;
         ConstSettings mConstSettings;
         std::vector<std::pair<Computer::Instructions::InstructionID, double>> mInstrProbs;

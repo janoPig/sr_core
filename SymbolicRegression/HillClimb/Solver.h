@@ -62,7 +62,7 @@ namespace SymbolicRegression::HillClimb
             if (fp.mVerbose > 1)
                 callback(0, mBestCode.mScore[2]);
 
-            const CodeMutation codeMut{fp.mConstSettings, fp.mInstrProbs, fp.mFeatProbs, mRandom};
+            const CodeMutation codeMut{fp.mBeta, fp.mConstSettings, fp.mInstrProbs, fp.mFeatProbs, mRandom};
             const ConstMutation<T> constMut{mRandom, fp.mConstSettings};
 
             std::vector<uint32_t> indices;
@@ -109,7 +109,7 @@ namespace SymbolicRegression::HillClimb
                 std::pair<size_t, double> worstBatch;
                 sel0[0] = hillclimber->mWorstBatch.first;
 
-                for (int subStep = 0; subStep < 15; subStep++)
+                for (uint32_t subStep = 0; subStep < fp.mNeighboursCount; subStep++)
                 {
                     neighbour = hillclimber->Current();
                     neighbour.ResetScore();
@@ -124,7 +124,7 @@ namespace SymbolicRegression::HillClimb
 
                         Evaluate(data, neighbour, sel0, 0, fp, sampleWeight);
 
-                        if (neighbour.mScore[0] >= 1.15 * hillclimber->Current().mScore[0])
+                        if (neighbour.mScore[0] >= (1.0 + fp.mAlpha) * hillclimber->Current().mScore[0])
                         {
                             continue;
                         }
@@ -143,7 +143,7 @@ namespace SymbolicRegression::HillClimb
 
                 if (find)
                 {
-                    if (bestCode.mScore[1] < hillclimber->Best().mScore[1] * 1.15)
+                    if (bestCode.mScore[1] < hillclimber->Best().mScore[1] * (1.0 + fp.mAlpha))
                     {
                         hillclimber->Current() = bestCode;
                         if (bestCode.mScore[1] < hillclimber->Best().mScore[1])
