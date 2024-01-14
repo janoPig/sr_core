@@ -93,9 +93,9 @@ namespace SymbolicRegression::HillClimb
                 }
                 if (it % 10000 == 0)
                 {
-                    const auto score = EvalPopulation(data, fp, sampleWeight);
                     if (fp.mVerbose > 1)
                     {
+                        const auto score = EvalPopulation(data, fp, sampleWeight);
                         callback(it, score);
                         std::cout << mBestCode.mCode.mTreeComplexity << " " << GetExpression(mBestCode) << std::endl;
                     }
