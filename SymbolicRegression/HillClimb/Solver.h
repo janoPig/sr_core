@@ -114,7 +114,6 @@ namespace SymbolicRegression::HillClimb
                 {
                     sel0[i] = hillclimber->mPretest[i].mIndex;
                 }
-                Utils::Result<BATCH> r;
 
                 for (uint32_t subStep = 0; subStep < fp.mNeighboursCount; subStep++)
                 {
