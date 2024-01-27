@@ -47,6 +47,8 @@ namespace SymbolicRegression
         uint32_t mVerbose;
         uint32_t mTournament;
         uint32_t mMetric;
+        uint32_t mPretestSize; // batch count
+        uint32_t mSampleSize;  // batch count
         uint32_t mNeighboursCount;
         double mAlpha;
         double mBeta;

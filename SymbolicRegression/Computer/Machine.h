@@ -23,11 +23,11 @@ namespace SymbolicRegression::Computer
 		{
 		}
 
-		auto ComputeScore(
+		void ComputeScore(
 			const Dataset &data,
 			const Code<T> &code,
 			const std::vector<size_t> &batchSelection,
-			Utils::Result &r,
+			Utils::Result<BATCH> &r,
 			uint32_t transformation,
 			uint32_t metric,
 			T clipMin,
@@ -37,8 +37,6 @@ namespace SymbolicRegression::Computer
 			bool filter = true,
 			const Utils::BatchVector<T, BATCH> *sampleWeight = nullptr) noexcept
 		{
-			auto maxError = 0.0;
-			size_t worstIdx = 0;
 			T *__restrict yPred = mMemory[code.Size() - 1];
 			const auto clip = clipMin < clipMax;
 			const auto cw = cw0 != cw1;
@@ -60,7 +58,6 @@ namespace SymbolicRegression::Computer
 					Utils::Clip<T, BATCH>(yPred, clipMin, clipMax);
 				}
 
-				r.mSamplesCount += BATCH;
 				// TODO: refactor and move to a separate class
 				auto score = 0.0;
 				if (metric == 0)
@@ -106,15 +103,8 @@ namespace SymbolicRegression::Computer
 					}
 				}
 
-				r.mScore += score;
-
-				if (score > maxError)
-				{
-					maxError = score;
-					worstIdx = batchIdx;
-				}
+				r.Add(batchIdx, score);
 			}
-			return std::pair{worstIdx, maxError / BATCH};
 		}
 
 		void Compute(Dataset &data, const Code<T> &code, uint32_t transformation, T clipMin, T clipMax, bool filter = false) noexcept

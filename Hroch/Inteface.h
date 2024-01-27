@@ -31,6 +31,8 @@ struct fit_params
     unsigned int verbose;
     unsigned int pop_sel;
     unsigned int metric;
+    unsigned int pretest_size; // batch count
+    unsigned int sample_size;  // batch count
     unsigned int neighbours_count;
     double alpha;
     double beta;

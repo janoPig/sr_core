@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EvaluatedCode.h"
+#include "../Utils/Evaluate.h"
 
 namespace SymbolicRegression::HillClimb
 {
@@ -34,7 +35,7 @@ namespace SymbolicRegression::HillClimb
 		EvaluatedCode<T> mBest{};
 
 	public:
-		std::vector<size_t> mSample;
-		std::pair<size_t, double> mWorstBatch;
+		std::vector<size_t> mSample{};
+		std::vector<Utils::BatchScore> mPretest{};
 	};
 }
