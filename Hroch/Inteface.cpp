@@ -169,6 +169,8 @@ SymbolicRegression::FitParams GetFitParams(const fit_params &fp, uint32_t xcols)
 		fp.verbose,
 		fp.pop_sel,
 		fp.metric,
+		fp.pretest_size,
+		fp.sample_size,
 		fp.neighbours_count,
 		fp.alpha,
 		fp.beta,

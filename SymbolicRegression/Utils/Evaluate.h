@@ -27,23 +27,44 @@ namespace SymbolicRegression::Utils
         return 1.0 - mse / tss;
     }
 
+    struct BatchScore
+    {
+        size_t mIndex;
+        double mScore;
+    };
+
+    template <size_t BATCH>
     struct Result
     {
         Result() = default;
 
-        inline double mean() const noexcept
+        inline double Mean() const noexcept
         {
-            return mScore / mSamplesCount;
+            return mScoreSum / (mScore.size() * BATCH);
         }
 
-        inline void reset() noexcept
+        inline void Reset() noexcept
         {
-            mSamplesCount = 0;
-            mScore = 0.0;
+            mScoreSum = 0.0;
+            mScore.clear();
         }
 
-        size_t mSamplesCount{0};
-        double mScore{0.0};
+        inline void Add(size_t batchIndex, double score) noexcept
+        {
+            mScoreSum += score;
+            mScore.push_back({batchIndex, score});
+        }
+
+        void GetNWorst(size_t n, std::vector<BatchScore> &sel)
+        {
+            n = std::min(mScore.size(), n);
+            sel.resize(n);
+            std::partial_sort_copy(mScore.begin(), mScore.end(), sel.begin(), sel.end(), [](const auto &a, const auto &b)
+                                   { return a.mScore > b.mScore; });
+        }
+
+        double mScoreSum{0.0};
+        std::vector<BatchScore> mScore;
     };
 
     template <typename T, size_t S>
