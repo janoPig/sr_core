@@ -203,6 +203,8 @@ namespace SymbolicRegression::Utils
         {
             for (size_t i = 0; i < S; i++)
             {
+                y[i] = std::max(y[i], static_cast<T>(-20.0));
+                y[i] = std::min(y[i], static_cast<T>(20.0));
                 y[i] = static_cast<T>(1.0) / (static_cast<T>(1.0) + std::exp(-y[i]));
             }
         }
