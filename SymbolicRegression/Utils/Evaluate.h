@@ -196,6 +196,41 @@ namespace SymbolicRegression::Utils
         return LARGE_FLOAT;
     }
 
+    template <typename T, bool CW, bool SW>
+    double ComputeLogitApprox(const T *const __restrict yTrue,
+                              const T *const __restrict yPred,
+                              const size_t size,
+                              T cw0 = (T)1.0,
+                              T cw1 = (T)1.0,
+                              const T *const __restrict sampleWeight = nullptr) noexcept
+    {
+        T err{};
+        const T cw[] = {cw0, cw1};
+        for (size_t n = 0; n < size; n++)
+        {
+            auto y = std::max(yPred[n], static_cast<T>(-5.0));
+            y = std::min(y, static_cast<T>(5.0));
+            const auto t0 = y * (static_cast<T>(0.5) - yTrue[n]) + static_cast<T>(0.69314718056);
+            const auto t1 = y * y;
+            auto _err = t0 + static_cast<T>(5.36669250834) * t1 / (t1 + static_cast<T>(49.1441046693));
+            if constexpr (CW)
+            {
+                _err *= cw[yTrue[n] > static_cast<T>(0.5)];
+            }
+            if constexpr (SW)
+            {
+                _err *= sampleWeight[n];
+            }
+            err += _err;
+        }
+
+        if (IsFinite(err))
+        {
+            return static_cast<double>(err);
+        }
+        return LARGE_FLOAT;
+    }
+
     template <typename T>
     double ComputePseudoKendall(const T *const __restrict yTrue, const T *const __restrict yPred, const size_t size) noexcept
     {
