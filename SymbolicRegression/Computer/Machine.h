@@ -48,58 +48,80 @@ namespace SymbolicRegression::Computer
 
 				mProcessor.Execute(code, data, mMemory, batchIdx, filter);
 
-				if (transformation)
-				{
-					Utils::TransformData<T, BATCH>(yPred, transformation);
-				}
-
-				if (clip)
-				{
-					Utils::Clip<T, BATCH>(yPred, clipMin, clipMax);
-				}
-
-				// TODO: refactor and move to a separate class
 				auto score = 0.0;
-				if (metric == 0)
-				{
-					if (sw)
-						score = Utils::ComputeSqErr<T, true>(yTrue, yPred, BATCH, sw);
-					else
-						score = Utils::ComputeSqErr<T, false>(yTrue, yPred, BATCH);
-				}
-				else if (metric == 1)
-				{
-					if (sw)
-						score = Utils::ComputeMAE<T, true>(yTrue, yPred, BATCH, sw);
-					else
-						score = Utils::ComputeMAE<T, false>(yTrue, yPred, BATCH);
-				}
-				else if (metric == 2)
-				{
-					if (sw)
-						score = Utils::ComputeMSLE<T, true>(yTrue, yPred, BATCH, sw);
-					else
-						score = Utils::ComputeMSLE<T, false>(yTrue, yPred, BATCH);
-				}
-				else if (metric == 3)
-				{
-					score = 1.0 - std::abs(Utils::ComputePseudoKendall(yTrue, yPred, BATCH));
-				}
-				else if (metric == 4)
+
+				// Logit approximation directly compute score log(1+exp(−f(x))) resp. log(1+exp(f(x)))
+				if (metric == 20)
 				{
 					if (cw)
 					{
 						if (sw)
-							score = Utils::ComputeLogLoss<T, true, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
+							score = Utils::ComputeLogitApprox<T, true, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
 						else
-							score = Utils::ComputeLogLoss<T, true, false>(yTrue, yPred, BATCH, cw0, cw1);
+							score = Utils::ComputeLogitApprox<T, true, false>(yTrue, yPred, BATCH, cw0, cw1);
 					}
 					else
 					{
 						if (sw)
-							score = Utils::ComputeLogLoss<T, false, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
+							score = Utils::ComputeLogitApprox<T, false, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
 						else
-							score = Utils::ComputeLogLoss<T, false, false>(yTrue, yPred, BATCH);
+							score = Utils::ComputeLogitApprox<T, false, false>(yTrue, yPred, BATCH);
+					}
+				}
+				else
+				{
+					if (transformation)
+					{
+						Utils::TransformData<T, BATCH>(yPred, transformation);
+					}
+
+					if (clip)
+					{
+						Utils::Clip<T, BATCH>(yPred, clipMin, clipMax);
+					}
+
+					// TODO: refactor and move to a separate class
+					if (metric == 0)
+					{
+						if (sw)
+							score = Utils::ComputeSqErr<T, true>(yTrue, yPred, BATCH, sw);
+						else
+							score = Utils::ComputeSqErr<T, false>(yTrue, yPred, BATCH);
+					}
+					else if (metric == 1)
+					{
+						if (sw)
+							score = Utils::ComputeMAE<T, true>(yTrue, yPred, BATCH, sw);
+						else
+							score = Utils::ComputeMAE<T, false>(yTrue, yPred, BATCH);
+					}
+					else if (metric == 2)
+					{
+						if (sw)
+							score = Utils::ComputeMSLE<T, true>(yTrue, yPred, BATCH, sw);
+						else
+							score = Utils::ComputeMSLE<T, false>(yTrue, yPred, BATCH);
+					}
+					else if (metric == 3)
+					{
+						score = 1.0 - std::abs(Utils::ComputePseudoKendall(yTrue, yPred, BATCH));
+					}
+					else if (metric == 4)
+					{
+						if (cw)
+						{
+							if (sw)
+								score = Utils::ComputeLogLoss<T, true, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
+							else
+								score = Utils::ComputeLogLoss<T, true, false>(yTrue, yPred, BATCH, cw0, cw1);
+						}
+						else
+						{
+							if (sw)
+								score = Utils::ComputeLogLoss<T, false, true>(yTrue, yPred, BATCH, cw0, cw1, sw);
+							else
+								score = Utils::ComputeLogLoss<T, false, false>(yTrue, yPred, BATCH);
+						}
 					}
 				}
 
