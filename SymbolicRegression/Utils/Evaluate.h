@@ -297,7 +297,7 @@ namespace SymbolicRegression::Utils
 
         // Calculate the ranks based on X/Y's order
         std::vector<int> rX(size), rY(size);
-        for (int i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
             rX[orderX[i]] = i;
             rY[orderY[i]] = i;
@@ -305,7 +305,7 @@ namespace SymbolicRegression::Utils
 
         double sum_abs_diffX = 0.0;
         double sum_abs_diffY = 0.0;
-        for (int i = 1; i < size; ++i)
+        for (size_t i = 1; i < size; ++i)
         {
             sum_abs_diffX += std::abs(rX[orderY[i]] - rX[orderY[i - 1]]);
             sum_abs_diffY += std::abs(rY[orderX[i]] - rY[orderX[i - 1]]);
