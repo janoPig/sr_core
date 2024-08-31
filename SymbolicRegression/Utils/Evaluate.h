@@ -281,4 +281,38 @@ namespace SymbolicRegression::Utils
             }
         }
     }
+
+    // xicor corelation coeficient, symetric(max(xi(x,y), xi(y,x))), without ties
+    // https://towardsdatascience.com/a-new-coefficient-of-correlation-64ae4f260310
+    template<typename T>
+    double Xicor(const T *__restrict X, const T *__restrict Y, size_t size)
+    {
+        // Create order vectors for X and Y based on sorting their values
+        std::vector<int> orderX(size), orderY(size);
+        std::iota(orderX.begin(), orderX.end(), 0);
+        std::iota(orderY.begin(), orderY.end(), 0);
+
+        std::sort(orderX.begin(), orderX.end(), [X](int a, int b) { return X[a] < X[b]; });
+        std::sort(orderY.begin(), orderY.end(), [Y](int a, int b) { return Y[a] < Y[b]; });
+
+        // Calculate the ranks based on X/Y's order
+        std::vector<int> rX(size), rY(size);
+        for (int i = 0; i < size; ++i)
+        {
+            rX[orderX[i]] = i;
+            rY[orderY[i]] = i;
+        }
+
+        double sum_abs_diffX = 0.0;
+        double sum_abs_diffY = 0.0;
+        for (int i = 1; i < size; ++i)
+        {
+            sum_abs_diffX += std::abs(rX[orderY[i]] - rX[orderY[i - 1]]);
+            sum_abs_diffY += std::abs(rY[orderX[i]] - rY[orderX[i - 1]]);
+        }
+
+        const auto sum_abs_diff = std::min(sum_abs_diffX, sum_abs_diffY);
+
+        return 1.0 - 3.0 * sum_abs_diff / (size * size - 1);
+    }
 }

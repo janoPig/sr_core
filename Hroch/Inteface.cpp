@@ -111,6 +111,11 @@ auto GetInstructions(const std::string &mt, uint32_t verbose)
 
 auto GetFeatProbs(std::string str, uint32_t count, uint32_t verbose)
 {
+	if (str == "xicor")
+	{
+		// lets empty, compute from xicor
+		return std::vector<std::pair<uint32_t, double>>{};
+	}
 	std::vector<std::pair<uint32_t, double>> featProbs{count};
 	for (uint32_t i = 0; i < featProbs.size(); i++)
 	{
@@ -215,6 +220,18 @@ int FitData(SolverHandle &solver,
 }
 
 template <typename T>
+auto GetFeatProbsFromXicor(FitParams& fp, const SymbolicRegression::Utils::Dataset<T, BATCH>& data, uint32_t rows)
+{
+	fp.mFeatProbs.resize(data.CountX());
+	for (uint32_t i = 0; i < fp.mFeatProbs.size(); i++)
+	{
+		fp.mFeatProbs[i].first = i;
+		fp.mFeatProbs[i].second = Utils::Xicor(data.DataX(i), data.DataY(), rows);
+		fp.mFeatProbs[i].second = std::max(fp.mFeatProbs[i].second, 0.0001);
+	}
+}
+
+template <typename T>
 int FitData(SolverHandle &solver, const T *X, const T *y, uint32_t rows, uint32_t xcols, const fit_params &params, const T *sw)
 {
 	if (!X || !y || xcols < 1 || xcols != solver.mSolverParams.input_size || rows < 4)
@@ -232,6 +249,11 @@ int FitData(SolverHandle &solver, const T *X, const T *y, uint32_t rows, uint32_
 
 	SymbolicRegression::Utils::BatchVector<T, BATCH> sampleWeight{(size_t)rows};
 	FillDataset(data, &sampleWeight, X, y, sw, rows, xcols, solver.mSolverParams.random_state);
+
+	if (fp.mFeatProbs.empty())
+	{
+		GetFeatProbsFromXicor(fp, data, rows);
+	}
 
 	return FitData(solver, data, fp, sw ? &sampleWeight : nullptr);
 }
@@ -400,4 +422,14 @@ void FreeModel(math_model *model)
 	delete[] model->str_representation;
 	delete[] model->str_code_representation;
 	delete[] model->used_constants;
+}
+
+double Xicor32(const float *X, const float *y, unsigned int rows)
+{
+	return Utils::Xicor(X, y, rows);
+}
+
+double Xicor64(const double *X, const double *y, unsigned int rows)
+{
+	return Utils::Xicor(X, y, rows);
 }

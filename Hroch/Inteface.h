@@ -74,3 +74,5 @@ extern "C" EXPORT int Predict64(void *hsolver, const double *X, double *y, unsig
 extern "C" EXPORT int GetBestModel(void *hsolver, math_model *model);
 extern "C" EXPORT int GetModel(void *hsolver, unsigned long long id, math_model *model);
 extern "C" EXPORT void FreeModel(math_model *model);
+extern "C" EXPORT double Xicor32(const float *X, const float *y, unsigned int rows);
+extern "C" EXPORT double Xicor64(const double *X, const double *y, unsigned int rows);

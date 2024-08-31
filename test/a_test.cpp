@@ -27,13 +27,6 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
     CsvFile csv(path);
     const auto samplesCount = csv.RowsCount();
 
-    std::vector<std::pair<uint32_t, double>> featProbs(csv.ColumnsCount() - 1);
-    for (uint32_t i = 0; i < featProbs.size(); i++)
-    {
-        featProbs[i].first = i;
-        featProbs[i].second = 1.0;
-    }
-
     Srl::Config cfg{
         .mRandomSeed = 42,
         .mPopulationSize = 64,
@@ -42,21 +35,6 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
         .mClipMax = 0.0,
         .mInitConstSettings = {.mMin = -1.0, .mMax = 1.0, .mPredefinedProb = 0.001, .mPredefinedSet = {0.0, 1.0, -1.0, 3.141592654}},
         .mCodeSettings = {csv.ColumnsCount() - 1, 8, 32, 32}};
-
-    Srl::FitParams fp{
-        .mTimeLimit = 0,
-        .mVerbose = 2,
-        .mTournament = 4,
-        .mMetric = 0, // MSE
-        .mPretestSize = 1,
-        .mSampleSize = 16,
-        .mNeighboursCount = 15,
-        .mAlpha = 0.15,
-        .mBeta = 0.5,
-        .mIterLimit = iter_count,
-        .mConstSettings = {.mMin = -1e30, .mMax = 1e30, .mPredefinedProb = 0.001, .mPredefinedSet = {0.0, 1.0, -1.0, 3.141592654}},
-        .mInstrProbs = Srl::Computer::Instructions::AdvancedMath,
-        .mFeatProbs = featProbs};
 
     Dataset data{samplesCount, cfg.mCodeSettings};
 
@@ -85,6 +63,29 @@ void run_test(const char *path, size_t iter_count = (size_t)-1)
     cfg.mCodeSettings.mInputSize = (uint32_t)data.CountX();
 
     std::cout << path << " loaded..." << std::endl;
+
+    std::vector<std::pair<uint32_t, double>> featProbs(csv.ColumnsCount() - 1);
+    for (uint32_t i = 0; i < featProbs.size(); i++)
+    {
+        featProbs[i].first = i;
+        featProbs[i].second = Srl::Utils::Xicor(data.DataX(i), data.DataY(), samplesCount);
+        featProbs[i].second = std::max(featProbs[i].second, 0.0001);
+    }
+
+    Srl::FitParams fp{
+        .mTimeLimit = 0,
+        .mVerbose = 2,
+        .mTournament = 4,
+        .mMetric = 0, // MSE
+        .mPretestSize = 1,
+        .mSampleSize = 16,
+        .mNeighboursCount = 15,
+        .mAlpha = 0.15,
+        .mBeta = 0.5,
+        .mIterLimit = iter_count,
+        .mConstSettings = {.mMin = -1e30, .mMax = 1e30, .mPredefinedProb = 0.001, .mPredefinedSet = {0.0, 1.0, -1.0, 3.141592654}},
+        .mInstrProbs = Srl::Computer::Instructions::AdvancedMath,
+        .mFeatProbs = featProbs };
 
     SRSolver solver{cfg};
 
