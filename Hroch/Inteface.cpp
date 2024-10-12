@@ -433,3 +433,13 @@ double Xicor64(const double *X, const double *y, unsigned int rows)
 {
 	return Utils::Xicor(X, y, rows);
 }
+
+double Pearson32(const float *X, const float *y, unsigned int rows)
+{
+	return Utils::Pearson(X, y, rows);
+}
+
+double Pearson64(const double *X, const double *y, unsigned int rows)
+{
+	return Utils::Pearson(X, y, rows);
+}
