@@ -297,7 +297,7 @@ namespace SymbolicRegression::Utils
 
         // Calculate the ranks based on X/Y's order
         std::vector<int> rX(size), rY(size);
-        for (size_t i = 0; i < size; ++i)
+        for (int i = 0; i < size; ++i)
         {
             rX[orderX[i]] = i;
             rY[orderY[i]] = i;
@@ -314,5 +314,38 @@ namespace SymbolicRegression::Utils
         const auto sum_abs_diff = std::min(sum_abs_diffX, sum_abs_diffY);
 
         return 1.0 - 3.0 * sum_abs_diff / (size * size - 1);
+    }
+
+    template<typename T>
+    double Pearson(const T *__restrict X, const T *__restrict Y, size_t size)
+    {
+        if (size == 0)
+        {
+            return 0.0;
+        }
+
+        T sum_X{};
+        T sum_Y{};
+        T sum_XY{};
+        T sum_X2{};
+        T sum_Y2{};
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            sum_X += X[i];
+            sum_Y += Y[i];
+            sum_XY += X[i] * Y[i];
+            sum_X2 += X[i] * X[i];
+            sum_Y2 += Y[i] * Y[i];
+        }
+
+        double numerator = static_cast<double>(size) * sum_XY - static_cast<double>(sum_X) * sum_Y;
+        double denominator = std::sqrt((static_cast<double>(size) * sum_X2 - static_cast<double>(sum_X) * sum_X) * (static_cast<double>(size) * sum_Y2 - static_cast<double>(sum_Y) * sum_Y));
+
+        if (denominator == 0.0)
+        {
+            return 0.0;
+        }
+        return numerator / denominator;
     }
 }
