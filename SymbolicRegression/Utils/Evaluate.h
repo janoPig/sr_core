@@ -299,8 +299,8 @@ namespace SymbolicRegression::Utils
         std::vector<int> rX(size), rY(size);
         for (size_t i = 0; i < size; ++i)
         {
-            rX[orderX[i]] = i;
-            rY[orderY[i]] = i;
+            rX[orderX[i]] = (int)i;
+            rY[orderY[i]] = (int)i;
         }
 
         double sum_abs_diffX = 0.0;
